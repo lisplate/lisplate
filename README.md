@@ -14,6 +14,73 @@ npm install lisplate@next
 
 ## Getting Started ##
 
+Once you have lisplate installed, you can require it in like any other module.
+
+**Soon to change** Currently, Lisplate is a singleton. Before beta release, it will export
+a class to be instantiated. Each instance of Lisplate can have different settings,
+loaders, and operate completely separate of each other.
+
+```
+var Lisplate = require('lisplate');
+```
+
+In order to load templates,
+Lisplate requires a `sourceLoader` function to find and read the source to be compiled.
+
+**Note**: The sourceLoader is not async, but will be before beta release.
+
+```
+Lisplate.sourceLoader = function(name) {
+    var filepath = path.resolve(myViewDirectory, name + '.ltml');
+    return fs.readFileSync(filepath, 'UTF-8');
+};
+```
+
+Lisplate also provides a hook to load view models for templates using the
+`viewModelLoader` function.
+
+**Note**: The sourceLoader is not async, but will be before beta release.
+
+```
+Lisplate.viewModelLoader = function(templatePath) {
+    var filepath = path.resolve(myViewModelDirectory, templatePath + '.js');
+    var viewmodel = null;
+    try {
+        viewmodel = require(filepath);
+    } catch(e) {
+    }
+    return viewmodel;
+};
+```
+
+## Lisplate Instance API ##
+
+### function addHelper(name, fn) ###
+Adds the function `fn` to the helpers context identified by `name`.
+
+### function loadTemplate(templateName) ###
+Loads a template and returns a function that can be executed by `render`.
+If the template is not cached, `loadTemplate` will use your `sourceLoader` to
+load the source to be compiled.
+This will use the compileFn function internally and cache the result.
+
+### function compileFn(templateName, src) ###
+Compiles the `src` using `compile` and caches the result under `templateName`.
+Returns a function that can be passed to `render`.
+
+### function compile(src) ###
+Compiles the `src`, attempts to load the view model class using `viewModelLoader`
+and returns a function that can be passed to `render`.
+
+### function render(template, props) ###
+Renders a template from the `template` function. The `props` can be any single object
+sent to the template for extra data.
+
+### function renderTemplate(templateName, params) ###
+Similar to `render`, but accepts a `templateName` to determine which template to load
+and render. If `templateName` is a function, the function is used as the template function
+passed to `render`.
+
 ## Syntax ##
 
 ## Blocks ##
@@ -200,6 +267,8 @@ Context:Identifier
 ```
 
 Built in functions are on the `i` context, but are accessible without a context specifier.
+
+Added helper functions are in the `h` context.
 
 Parameters sent to the template via an include or through rendering are in the `p` context.
 
