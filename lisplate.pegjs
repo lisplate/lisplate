@@ -65,8 +65,14 @@ ctx
     { return s + c.join(''); }
 
 identifier
-    = c:(c:ctx ":" { return c; })? i:key
-    { return withPosition(['identifier', [c || '', i]]); }
+    = c:ctx ":" "."
+    { return withPosition(['identifier', [c, null]]); }
+    / c:ctx ":" i:key
+    { return withPosition(['identifier', [c, i]]); }
+    / i:key
+    { return withPosition(['identifier', ['', i]]); }
+//    = c:(c:ctx ":" { return c; })? i:key
+//    { return withPosition(['identifier', [c || '', i]]); }
 
 paramlist
     = "(" filler p:(k:key filler { return k; })* filler ")"

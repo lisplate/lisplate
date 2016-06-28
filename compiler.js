@@ -119,7 +119,11 @@ function processidentifier(v) {
   var name = v.shift();
 
   if (ctx) {
-    return '$' + ctx + '.' + name;
+    if (name) {
+      return '$' + ctx + '.' + name;
+    } else {
+      return '$' + ctx;
+    }
   }
 
   return name;
@@ -179,7 +183,11 @@ function processempty() {
       callable = processidentifier(v[0][1]);
     } else if (type === 'internal') {
       needsProtection = false;
-      callable = processinternal(v[0][1]);
+      if (v[0][1][0] === 'include') {
+        callable = '$L.renderTemplate';
+      } else {
+        callable = processinternal(v[0][1]);
+      }
     } else {
       throw new Error('unknown callable ' + v[0]);
     }
@@ -190,6 +198,7 @@ function processempty() {
     }
 
     var output = callable;
+
     if (needsProtection) {
       output = processinternal(['escapeHtml']) + '(' + output;
     }
@@ -245,6 +254,6 @@ module.exports = function(src) {
     return '$i_' + item + '= $i.' + item;
   }).join(',\n') + ';\n\n';
 
-  var code = 'function($L,Chunk,$p,$i) {var $h=$L.helpers;\nvar $c = new Chunk();\n' + internals + compiled + '\nreturn $c.getOutput();\n}\n';
+  var code = 'function(vmc){return function($L,Chunk,$p,$i) {var $v=vmc?new vmc($p):null; var $h=$L.helpers;\nvar $c = new Chunk();\n' + internals + compiled + '\nreturn $c.getOutput();\n}\n}';
   return code;
 }

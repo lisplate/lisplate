@@ -1,19 +1,19 @@
 var compiler = require('./compiler');
 //var Bluebird = require('bluebird');
 // var AsyncWriter = require('async-writer');
-var path = require('path');
-var fs = require('fs');
 
 function Lisplate(options) {
   this.helpers = {};
+  this.cache = {};
   this.sourceLoader = null;
+  this.viewModelLoader = null;
 }
 
 Lisplate.prototype.addHelper = function addHelper(name, fn) {
   this.helpers[name] = fn;
 };
 
-Lisplate.prototype.loadTemplate = function load(templateName) {
+Lisplate.prototype.loadTemplate = function loadTemplate(templateName) {
   if (!templateName || !templateName.length) {
       throw new Error('Must specify a template to load');
   }
@@ -22,19 +22,31 @@ Lisplate.prototype.loadTemplate = function load(templateName) {
     return templateName;
   }
 
+  if (this.cache[templateName]) {
+    return this.cache[templateName];
+  }
+
   if (!this.sourceLoader) {
     throw new Error('Must define a sourceLoader');
   }
   var src = this.sourceLoader(templateName);
 
-  return this.compileFn(src);
+  return this.compileFn(templateName, src);
 };
 
-Lisplate.prototype.compileFn = function compileFn(src) {
+Lisplate.prototype.compileFn = function compileFn(templateName, src) {
   var compiled = this.compile(src);
 
-  var fn = this.loadCompiledSource(compiled);
+  var factory = this.loadCompiledSource(compiled);
 
+  var viewModelClass = null;
+  if (this.viewModelLoader) {
+    viewModelClass = this.viewModelLoader(templateName);
+  }
+
+  var fn = factory(viewModelClass);
+
+  this.cache[templateName] = fn;
   return fn;
 };
 
@@ -59,7 +71,7 @@ Lisplate.prototype.render = function render(template, params) {
   // callback(null, chunk.writer.getOutput());
 }
 
-Lisplate.prototype.renderTemplate = function render(templateName, params) {
+Lisplate.prototype.renderTemplate = function renderTemplate(templateName, params) {
   var fn = this.loadTemplate(templateName);
   return this.render(fn, params);
 }
@@ -91,6 +103,9 @@ function replaceChar(match) {
 
 var internal = {
   escapeHtml: function escapeXmlAttr(str) {
+    if (typeof str !== 'string') {
+      return str;
+    }
     if (!htmlTest.test(str)) {
       return str;
     }
@@ -147,11 +162,6 @@ var internal = {
 
   mod: function(l, r) {
     return _resolve(l) % _resolve(r);
-  },
-
-  include: function(name) {
-    // load name if it exists (may load direct or compile it)
-    return engine.renderTemplate(name);
   },
 
   each: function(arr, then, elsethen) {
