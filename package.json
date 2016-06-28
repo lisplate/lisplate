@@ -3,9 +3,10 @@
   "version": "0.0.1",
   "description": "Functional template engine based on Lisp-like syntax for JavaScript",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "keywords": [
+    "views",
+    "templates"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/HallM/Lisplate.git"
