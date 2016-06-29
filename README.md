@@ -16,41 +16,36 @@ npm install lisplate@next
 
 Once you have lisplate installed, you can require it in like any other module.
 
-**Soon to change** Currently, Lisplate is a singleton. Before beta release, it will export
-a class to be instantiated. Each instance of Lisplate can have different settings,
-loaders, and operate completely separate of each other.
-
-```
-var Lisplate = require('lisplate');
-```
+Lisplate exports a class to allow users to create different instances.
+Each instance may have different loaders, configuration, and run completely separate.
 
 In order to load templates,
 Lisplate requires a `sourceLoader` function to find and read the source to be compiled.
 
-**Note**: The sourceLoader is not async, but will be before beta release.
-
-```
-Lisplate.sourceLoader = function(name) {
-    var filepath = path.resolve(myViewDirectory, name + '.ltml');
-    return fs.readFileSync(filepath, 'UTF-8');
-};
-```
-
 Lisplate also provides a hook to load view models for templates using the
 `viewModelLoader` function.
 
-**Note**: The sourceLoader is not async, but will be before beta release.
+Both the `sourceLoader` and `viewModelLoader` may run synchronously or use a supplied callback.
+In the examples below, the `sourceLoader` is used asynchronously with a callback
+while the `viewModelLoad` is used synchronously.
 
 ```
-Lisplate.viewModelLoader = function(templatePath) {
-    var filepath = path.resolve(myViewModelDirectory, templatePath + '.js');
-    var viewmodel = null;
-    try {
-        viewmodel = require(filepath);
-    } catch(e) {
+var Lisplate = require('lisplate');
+var engine = new Lisplate({
+    sourceLoader: function(name, callback) {
+        var filepath = path.resolve(myViewDirectory, name + '.ltml');
+        fs.readFile(filepath, 'UTF-8', callback);
+    },
+    viewModelLoader: function(templateName) {
+        var filepath = path.resolve(myViewModelDirectory, templatePath + '.js');
+        var viewmodel = null;
+        try {
+            viewmodel = require(filepath);
+        } catch(e) {
+        }
+        return viewmodel;
     }
-    return viewmodel;
-};
+});
 ```
 
 ## Lisplate Instance API ##

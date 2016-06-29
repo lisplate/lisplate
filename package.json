@@ -1,8 +1,8 @@
 {
   "name": "lisplate",
-  "version": "0.0.1-alpha.1",
+  "version": "0.0.1-alpha.2",
   "description": "Functional template engine based on Lisp-like syntax for JavaScript",
-  "main": "index.js",
+  "main": "lib/index.js",
   "keywords": [
     "views",
     "templates"
@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/HallM/Lisplate/issues"
   },
-  "homepage": "https://github.com/HallM/Lisplate"
+  "homepage": "https://github.com/HallM/Lisplate",
+  "dependencies": {
+    "bluebird": "^3.4.1"
+  }
 }
