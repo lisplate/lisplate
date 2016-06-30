@@ -123,6 +123,12 @@ Call
     = opentag filler s:"!"? c:callable filler p:paramset filler closetag
     { return withPosition(['call', [c, p, !!s]]); }
 
+associativeitem
+    = k:key filler "=" filler v:expression
+    { return [k, v]; }
+Map
+    = "[" filler a:(e:associativeitem filler { return e; })* filler "]"
+    { return withPosition(['map', [a]]); }
 Array
     = "[" filler a:(e:expression filler { return e; })* filler "]"
     { return withPosition(['array', [a]]); }
@@ -141,6 +147,7 @@ expression
     = Tag
     / identifier
     / literal
+    / Map
     / Array
 
 internalfunction
