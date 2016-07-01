@@ -164,8 +164,9 @@ comparators
       / ">" {return 'gt'; }
       / "<=" {return 'lte'; }
       / ">=" {return 'gte'; }
-      / "&&" {return 'cmpand'; }
-      / "||" {return 'cmpor'; }
+      / "and" {return 'cmpand'; }
+      / "or" {return 'cmpor'; }
+      / "not" {return 'not';}
     )
     { return ['internal', [c]]; }
 mathators
