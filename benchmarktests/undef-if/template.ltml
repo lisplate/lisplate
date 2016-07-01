@@ -1,0 +1,3 @@
+{{fn (item)
+{if item.fieldNotThere "this should not show up" "this is what should show up"}
+} [one="test"]}
