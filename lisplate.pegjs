@@ -127,7 +127,9 @@ associativeitem
     = k:key filler "=" filler v:expression
     { return [k, v]; }
 Map
-    = "[" filler a:(e:associativeitem filler { return e; })* filler "]"
+    = "[=]"
+    { return withPosition(['map', []]); }
+    / "[" filler a:(e:associativeitem filler { return e; })* filler "]"
     { return withPosition(['map', [a]]); }
 Array
     = "[" filler a:(e:expression filler { return e; })* filler "]"
