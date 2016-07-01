@@ -153,7 +153,9 @@ expression
 internalfunction
     = k:("include"
         / "each"
-        / "if")
+        / "if"
+        / "isEmpty"
+        / "isNotEmpty")
     { return ['internal', [k]]; }
 
 comparators
