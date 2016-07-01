@@ -5,7 +5,7 @@ var Bluebird = require('bluebird');
 
 var readFile = Bluebird.promisify(fs.readFile);
 
-var test = 'ui-components';
+var test = process.argv[2] || 'ui-components';
 
 var engine = new Lisplate({
     sourceLoader: function(name) {
@@ -26,10 +26,22 @@ var engine = new Lisplate({
 
 // engine.addHelper('reverse', require('../helpers/util').reverse);
 
+var data = null;
+try {
+    data = require('./' + test + '/data.json');
+} catch (e) {
+}
+if (!data) {
+    try {
+        data = require('./' + test + '/data');
+    } catch (e) {
+    }
+}
+
 engine
     .loadTemplate('template')
     .then(function(fn) {
-        return engine.render(fn, require('./' + test + '/data.json'));
+        return engine.render(fn, data);
     })
     .then(function(output) {
         console.log(output);
