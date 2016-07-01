@@ -151,8 +151,7 @@ expression
     / Array
 
 internalfunction
-    = k:("helper"
-        / "include"
+    = k:("include"
         / "each"
         / "if")
     { return ['internal', [k]]; }

@@ -53,28 +53,32 @@ var engine = new Lisplate({
 ### function addHelper(name, fn) ###
 Adds the function `fn` to the helpers context identified by `name`.
 
-### function loadTemplate(templateName) ###
+### function loadTemplate(templateName, [callback]) ###
 Loads a template and returns a function that can be executed by `render`.
 If the template is not cached, `loadTemplate` will use your `sourceLoader` to
 load the source to be compiled.
 This will use the compileFn function internally and cache the result.
+Returns a Promise that returns the renderable function.
+If a callback is passed, the callback will be used instead.
 
-### function compileFn(templateName, src) ###
+### function compileFn(templateName, src, [callback]) ###
 Compiles the `src` using `compile` and caches the result under `templateName`.
-Returns a function that can be passed to `render`.
+Returns a Promise that returns the renderable function.
+If a callback is passed, the callback will be used instead.
 
 ### function compile(src) ###
 Compiles the `src`, attempts to load the view model class using `viewModelLoader`
 and returns a function that can be passed to `render`.
 
-### function render(template, props) ###
-Renders a template from the `template` function. The `props` can be any single object
-sent to the template for extra data.
+### function render(template, data, [callback]) ###
+Renders a template from the `template` function.
+May return a string or a Promise if the template requires asynchronous handling.
+If a callback is passed, the callback will be used instead.
 
-### function renderTemplate(templateName, params) ###
+### function renderTemplate(templateName, data, [callback]) ###
 Similar to `render`, but accepts a `templateName` to determine which template to load
 and render. If `templateName` is a function, the function is used as the template function
-passed to `render`.
+passed to `render`. The output is the same as the `render` function.
 
 ## Syntax ##
 
@@ -111,6 +115,29 @@ The empty expression is mostly used for passing `null`-like values for parameter
 
 ```
 {}
+```
+
+## Arrays ##
+
+The array expression allows creation of standard arrays.
+Arrays may contain anything using expressions.
+Unlike JavaScript arrays, Lisplate arrays are separated by spaces
+similar to function parameters.
+
+```
+[itemOne itemTwo {+ 3 5} {fn (a b) {- a b}}]
+```
+
+## Associative Arrays / Maps ##
+
+Associative arrays expression creates a key to value map.
+The values can be from any expression.
+Associative arrays are essentially a JavaScript object internally.
+Unlike JavaScript objects, Lisplate associative arrays look similar to arrays,
+but use `key=value` with spaces separating the key=value pairs.
+
+```
+[key=value two={+ 3 5} myfn={fn (a b) {- a b}}]
 ```
 
 ### Raw ###
@@ -250,24 +277,30 @@ Supported operators:
 Contexts are special variables that provide access to template parameters and view models.
 Contexts can be used to access variables even if the variable name is used as a parameter.
 To select a context for an identifier, put the context label and a colon before the identifier.
+Contexts and fields on a context are protected and can not be overriden by internal scopes.
 ```
 Context:Identifier
 ```
 ```
-{p:myParameter}
-{each p:myArray {fn (myItem)
+{data:myParameter}
+{helper:myHelper}
+{viewmodel:myViewModelItem}
+{strings:someString}
+{each data:myArray {fn (myItem)
   This is the array item: {myItem}
-  This is the parameter item: {p:myItem}
+  This is the data item: {data:myItem}
 }}
 ```
 
-Built in functions are on the `i` context, but are accessible without a context specifier.
+Built in functions are on the `runtime` context, but are accessible without a context specifier.
 
-Added helper functions are in the `h` context.
+Added helper functions are in the `helper` context.
 
-Parameters sent to the template via an include or through rendering are in the `p` context.
+Data sent to the template via an include or through rendering is in the `data` context.
 
-View model functions and data are in the `v` context.
+View model fields are accessible in the `viewmodel` context.
+
+Fields in the strings file are accessible in the `strings` context.
 
 **Coming soon**: Currently Lisplate does not search contexts.
 Before 1.0, a template should be capable of searching contexts (parameters and viewmodel).
