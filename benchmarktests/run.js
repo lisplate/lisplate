@@ -4,17 +4,17 @@ var data = require('./friends/data');
 var engine = new Lisplate({
 });
 
-var template = function(vmc){return function($L,$p,$i) {var $v=vmc?new vmc($p):null; var $h=$L.helpers; var $_w=$i.$W;
+var template = function($$vmc){return function($$Lisplate,$data,$strings,$runtime) {var $viewmodel=$$vmc?new $$vmc($data):null; var $helper=$$Lisplate.helpers; var $_w=$runtime.$W;
 var $c = new $_w();
-var $i_each= $i.each,
-$i_escapeHtml= $i.escapeHtml,
-$i_if= $i.if;
+var $i_each= $runtime.each,
+$i_escapeHtml= $runtime.escapeHtml,
+$i_if= $runtime.if;
 
 $c.w("<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><title>Friends</title></head><body><div class=\"friends\">")
-$c.w($i_each($p.friends,(function(friend) {
+$c.w($i_each($data.friends,(function(friend) {
 var $c = new $_w();
 $c.w("<div class=\"friend\"><ul><li>Name: ")
-$c.w($i_escapeHtml($p.getFullNameMve(friend)))
+$c.w($i_escapeHtml($data.getFullNameMve(friend)))
 $c.w("</li><li>Balance: ")
 $c.w($i_escapeHtml(friend.balance))
 $c.w("</li><li>Age: ")
