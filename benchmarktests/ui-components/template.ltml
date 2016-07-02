@@ -1,5 +1,5 @@
 <div class="my-app">
-    {each data:. {fn (info)
-    {include "components/LisplateColors" info}
+    {each data::. {fn (info)
+    {include "components/LisplateColors" (:name info.name :colors info.colors)}
     }}
 </div>

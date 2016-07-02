@@ -26,9 +26,12 @@ ws
 
 opentag
     = "{"
-
 closetag
     = "}"
+openarray
+    = "("
+closearray
+    = ")"
 
 string
     = '"' s:(!'"' !eol c:. {return c})* '"'
@@ -49,8 +52,12 @@ signed_integer
 integer
     = signed_integer / unsigned_integer
 
+boolean
+    = "true" { return true; }
+    / "false" { return false; }
+
 literal
-    = l:(string / number)
+    = l:(string / number / boolean)
     { return ['literal', [l]]; }
 
 keypart
@@ -64,18 +71,17 @@ ctx
     = s:[a-zA-Z] c:[a-zA-Z0-9_]*
     { return s + c.join(''); }
 
+scopeoperator = "::"
 identifier
-    = c:ctx ":" "."
+    = c:ctx scopeoperator "."
     { return withPosition(['identifier', [c, null]]); }
-    / c:ctx ":" i:key
+    / c:ctx scopeoperator i:key
     { return withPosition(['identifier', [c, i]]); }
     / i:key
     { return withPosition(['identifier', ['', i]]); }
-//    = c:(c:ctx ":" { return c; })? i:key
-//    { return withPosition(['identifier', [c || '', i]]); }
 
 paramlist
-    = "(" filler p:(k:key filler { return k; })* filler ")"
+    = openarray filler p:(k:key filler { return k; })* filler closearray
     { return p; }
 paramset
     = p:(e:expression filler { return e; })*
@@ -124,15 +130,15 @@ Call
     { return withPosition(['call', [c, p, !!s]]); }
 
 associativeitem
-    = k:key filler "=" filler v:expression
+    = ":" k:key filler v:expression
     { return [k, v]; }
 Map
-    = "[=]"
+    = openarray ":" closearray
     { return withPosition(['map', []]); }
-    / "[" filler a:(e:associativeitem filler { return e; })* filler "]"
+    / openarray filler a:(e:associativeitem filler { return e; })* filler closearray
     { return withPosition(['map', [a]]); }
 Array
-    = "[" filler a:(e:expression filler { return e; })* filler "]"
+    = openarray filler a:(e:expression filler { return e; })* filler closearray
     { return withPosition(['array', [a]]); }
 
 Empty

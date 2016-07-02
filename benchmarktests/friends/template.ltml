@@ -6,10 +6,10 @@
 </head>
 <body>
     <div class="friends">
-        {each data:friends {fn (friend)
+        {each data::friends {fn (friend)
         <div class="friend">
             <ul>
-                <li>Name: {data:getFullNameMve friend}</li>
+                <li>Name: {data::getFullNameMve friend}</li>
                 <li>
                     Balance: {friend.balance}
                 </li>
