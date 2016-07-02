@@ -15,4 +15,4 @@
     </div>
     }}}
 </div>
-} [accountStatus="good" balance=10 formattedBalance="10.00"]}
+} (:accountStatus "good" :balance 10 :formattedBalance "10.00")}
