@@ -3,7 +3,8 @@
     return parseInt(arr.join(''), 10);
   }
   function withPosition(arr) {
-    return arr;/*.concat([['line', line()], ['col', column()]])*/;
+    var loc = location().start;
+    return arr.concat([loc.line, loc.column]);
   }
 }
 
@@ -12,7 +13,7 @@ start
 
 block
     = s:(Tag / buffer / Comment)*
-    { return withPosition(['block', s]); }
+    { return ['block', s]; }
 
 eol
     = "\n"
@@ -74,11 +75,11 @@ ctx
 scopeoperator = "::"
 identifier
     = c:ctx scopeoperator "."
-    { return withPosition(['identifier', [c, null]]); }
+    { return ['identifier', [c, null]]; }
     / c:ctx scopeoperator i:key
-    { return withPosition(['identifier', [c, i]]); }
+    { return ['identifier', [c, i]]; }
     / i:key
-    { return withPosition(['identifier', ['', i]]); }
+    { return ['identifier', ['', i]]; }
 
 paramlist
     = openarray filler p:(k:key filler { return k; })* filler closearray
@@ -134,12 +135,12 @@ associativeitem
     { return [k, v]; }
 Map
     = openarray ":" closearray
-    { return withPosition(['map', []]); }
+    { return ['map', []]; }
     / openarray filler a:(e:associativeitem filler { return e; })* filler closearray
-    { return withPosition(['map', [a]]); }
+    { return ['map', [a]]; }
 Array
     = openarray filler a:(e:expression filler { return e; })* filler closearray
-    { return withPosition(['array', [a]]); }
+    { return ['array', [a]]; }
 
 Empty
     = opentag closetag
