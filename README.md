@@ -16,6 +16,10 @@ npm install lisplate@next
 
 Once you have lisplate installed, you can require it in like any other module.
 
+Lisplate does require a global Promise to be set up. Native ES6 promises are supported
+along with any Promise polyfill or setting global.Promise to the implementation
+of your choice.
+
 Lisplate exports a class to allow users to create different instances.
 Each instance may have different loaders, configuration, and run completely separate.
 
