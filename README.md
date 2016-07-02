@@ -66,7 +66,7 @@ Compiles the `src` using `compile` and caches the result under `templateName`.
 Returns a Promise that returns the renderable function.
 If a callback is passed, the callback will be used instead.
 
-### function compile(src) ###
+### function compile(templateName, src) ###
 Compiles the `src`, attempts to load the view model class using `viewModelLoader`
 and returns a function that can be passed to `render`.
 
@@ -109,6 +109,12 @@ Numbers may be integers or decimal numbers.
 6.28
 ```
 
+Boolean values may be true or false.
+```
+true
+false
+```
+
 ### Empty Expression ###
 
 The empty expression is mostly used for passing `null`-like values for parameters.
@@ -125,7 +131,8 @@ Unlike JavaScript arrays, Lisplate arrays are separated by spaces
 similar to function parameters.
 
 ```
-[itemOne itemTwo {+ 3 5} {fn (a b) {- a b}}]
+(itemOne itemTwo {+ 3 5} {fn (a b) {- a b}})
+()
 ```
 
 ## Associative Arrays / Maps ##
@@ -134,10 +141,11 @@ Associative arrays expression creates a key to value map.
 The values can be from any expression.
 Associative arrays are essentially a JavaScript object internally.
 Unlike JavaScript objects, Lisplate associative arrays look similar to arrays,
-but use `key=value` with spaces separating the key=value pairs.
+but use `:key value` with spaces separating the key:value pairs.
+The syntax is similar to Clojure, but using `()` instead of `{}`.
 
 ```
-[key=value two={+ 3 5} myfn={fn (a b) {- a b}}]
+(:key value :two {+ 3 5} :myfn {fn (a b) {- a b}})
 ```
 
 ### Raw ###
@@ -189,11 +197,26 @@ Built-in functions do not escape their output nor do any functions defined in th
 
 Lisplate provides a number of built-in functions.
 
+##### Math #####
+
+The standard math operators are available:
+`+`, `-`, `*`, `/`, `%`
+
+##### Comparisons #####
+
+The standard comparison operators are available:
+`==`, `!=`, `<`, `>`, `<=`, `>=`
+
+The one exception is for the `not`, `and`, and `or`
+use the full work instead of the symbol notation.
+
 ##### if #####
 
 The if built-in allows for conditional sections.
 When the condition is truthy, the ThenExpression is executed.
 Otherwise, the ElseExpression is executed.
+A note with JavaScript: empty array is a truthy value. In these cases,
+use the `isEmpty` or `isNotEmpty` built-ins along with the `if`.
 
 The ElseExpression is optional, but the ThenExpression is required.
 To use only an ElseExpression, define the ThenExpression to be an Empty, `{}`
@@ -231,9 +254,15 @@ Index of the item is: {index}
 } "There are no items in the array"}
 ```
 
-##### include #####
+##### isEmpty and isNotEmpty #####
 
-**Incomplete** The include function is not complete and still in-development.
+The two functions `isEmpty` and `isNotEmpty` provide helpers to determine
+if an item is considered empty. Strings and arrays are considered empty
+when their length is 0. The number 0 is also empty.
+All falsy value (false, null, undefined) are also considered empty.
+All other values are considered not-empty;
+
+##### include #####
 
 The include built-in includes another template.
 Parameters passed to the include call will be passed to the template.
@@ -345,7 +374,7 @@ surrounding scope.
 ```
 {{fn (liTag liClass renderColors)
     <div>
-        {renderColors p:colors {fn (color)
+        {renderColors data:colors {fn (color)
             <{liTag}
               {if liClass {+ {+ "class=\"" liClass} "\""}}
               style="background-color: {color}">
@@ -358,7 +387,7 @@ surrounding scope.
     "color"
     {fn (colors renderColor)
         {if colors.length {fn
-            <ul>{colors.map renderColor}</ul>
+            <ul>{each colors renderColor}</ul>
         } {fn
             <div>No colors!</div>
         }}
