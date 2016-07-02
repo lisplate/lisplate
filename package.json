@@ -1,6 +1,6 @@
 {
   "name": "lisplate",
-  "version": "0.0.1-alpha.4",
+  "version": "0.1.0",
   "description": "Functional template engine based on Lisp-like syntax for JavaScript",
   "main": "lib/index.js",
   "keywords": [
@@ -9,21 +9,22 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/HallM/Lisplate.git"
+    "url": "https://github.com/HallM/lisplate.git"
   },
   "scripts": {
-    "build-parser": "pegjs lisplate.pegjs lib/parser.js"
+    "build-parser": "pegjs lisplate.pegjs lib/parser.js",
+    "test": "eslint lib/**"
   },
   "author": "Matthew Hall <mdhall@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/HallM/Lisplate/issues"
+    "url": "https://github.com/HallM/lisplate/issues"
   },
-  "homepage": "https://github.com/HallM/Lisplate",
+  "homepage": "https://github.com/HallM/lisplate",
   "dependencies": {
-    "bluebird": "^3.4.1"
   },
   "devDependencies": {
+    "eslint": "^3.0.0",
     "pegjs": "0.9.0"
   }
 }
