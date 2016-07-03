@@ -13,7 +13,9 @@
   },
   "scripts": {
     "build-parser": "pegjs lisplate.pegjs lib/parser.js",
-    "test": "eslint lib/**"
+    "test": "eslint lib/** && istanbul cover jasmine",
+    "lint": "eslint lib/**",
+    "coverage": "istanbul cover jasmine"
   },
   "author": "Matthew Hall <mdhall@gmail.com>",
   "license": "MIT",
@@ -21,10 +23,11 @@
     "url": "https://github.com/HallM/lisplate/issues"
   },
   "homepage": "https://github.com/HallM/lisplate",
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "eslint": "^3.0.0",
+    "istanbul": "^0.4.4",
+    "jasmine": "^2.4.1",
     "pegjs": "0.9.0"
   }
 }

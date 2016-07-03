@@ -1,0 +1,20 @@
+{{fn (renderColor renderColors)
+    <div className="colors">
+        Hello {data::name}
+        {!renderColors data::colors renderColor}
+    </div>
+}
+    {fn (color)
+        <li className="color" style="background-color: {color}">
+            {color}
+        </li>
+    }
+
+    {fn (colors renderColor)
+        {if {isNotEmpty colors} {fn
+            <ul>{each colors renderColor}</ul>
+        } {fn
+            <div>No colors!</div>
+        }}
+   }
+}

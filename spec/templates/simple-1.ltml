@@ -1,0 +1,15 @@
+<div class="colors">
+    Hello {data::name}!
+
+    {if {isNotEmpty data::colors} {fn
+    <ul>
+        {each data::colors {fn (color)
+        <li class="color">{color}</li>
+        }}
+    </ul>
+    } {fn
+    <div>
+        No colors!
+    </div>
+    }}
+</div>

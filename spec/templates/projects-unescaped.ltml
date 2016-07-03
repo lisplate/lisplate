@@ -1,0 +1,13 @@
+<html>
+    <head>
+        <title>{!data::title}</title>
+    </head>
+    <body>
+        <p>{!data::text}</p>
+        {each data::projects {fn (project)
+            <a href="{!project.url}">{!project.name}</a>
+            <p>{!project.description}</p>
+        }
+        "No projects"}
+    </body>
+</html>

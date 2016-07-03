@@ -1,1 +1,7 @@
 node_modules
+coverage
+.DS_Store
+npm-debug.log*
+.grunt
+.npm
+.node_repl_history

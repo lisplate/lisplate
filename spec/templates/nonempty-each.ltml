@@ -1,0 +1,3 @@
+{each (5 4 3 2 1) {fn (v i)
+{+ i 1}: should show {- v 1} more times
+} "should not show"}

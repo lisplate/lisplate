@@ -1,0 +1,18 @@
+{each data::accounts {fn (account)
+<div>
+    {if {== account.accountStatus "closed"} {fn
+    <div>
+        Your account has been closed!
+    </div>
+    } {if {== account.accountStatus "suspended"} {fn
+    <div>
+        Your account has been temporarily suspended
+    </div>
+    } {fn
+    <div>
+        Bank balance:
+        <span class="{if {< account.balance 0} "negative" "positive"}">${account.balanceFormatted}</span>
+    </div>
+    }}}
+</div>
+}}

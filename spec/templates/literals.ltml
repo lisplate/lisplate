@@ -1,0 +1,9 @@
+{{fn (a b c d e f g)
+{a}{~s}
+{b}{~s}
+{c}{~s}
+{d}{~s}
+{e}{~s}
+{f}{~s}
+{g}
+} -1 42 3.14 "string" "" true false}
