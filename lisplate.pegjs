@@ -12,7 +12,7 @@ start
     = block
 
 block
-    = s:(Tag / buffer / Comment)*
+    = s:(Comment* t:(Tag / buffer) { return t; })* Comment*
     { return ['block', s]; }
 
 eol
