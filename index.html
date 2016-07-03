@@ -196,6 +196,7 @@ but use <code>:key value</code> with spaces separating the key:value pairs.
 The syntax is similar to Clojure, but using <code>()</code> instead of <code>{}</code>.</p>
 
 <pre><code>(:key value :two {+ 3 5} :myfn {fn (a b) {- a b}})
+(:)
 </code></pre>
 
 <h3>
@@ -258,7 +259,7 @@ Built-in functions do not escape their output nor do any functions defined in th
 <a id="comparisons" class="anchor" href="#comparisons" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Comparisons</h5>
 
 <p>The standard comparison operators are available:
-<code>==</code>, <code>!=</code>, <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code></p>
+<code>==</code>, <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code></p>
 
 <p>The one exception is for the <code>not</code>, <code>and</code>, and <code>or</code>
 use the full work instead of the symbol notation.</p>
