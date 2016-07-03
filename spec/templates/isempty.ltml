@@ -1,0 +1,8 @@
+{if {isEmpty 0} "should not show" "should show"}{~n}
+{if {isEmpty 1} "should not show" "should show"}{~n}
+{if {isEmpty 99999} "should not show" "should show"}{~n}
+{if {isEmpty ()} "should show" "should not show"}{~n}
+{if {isEmpty (1)} "should not show" "should show"}{~n}
+{if {isEmpty ""} "should show" "should not show"}{~n}
+{if {isEmpty "a"} "should not show" "should show"}{~n}
+{if {isNotEmpty (1)} "should show" "should not show"}
