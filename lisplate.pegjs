@@ -95,11 +95,11 @@ buffer
     { return ["buffer", [b.join('')]]; }
 
 escapekeys
-    = "s"
+    = "rb"
+    / "lb"
+    / "s"
     / "n"
     / "r"
-    / "lb"
-    / "rb"
 escapes
     = opentag "~" k:escapekeys closetag
     { return ['escape', [k]]; }
@@ -154,10 +154,10 @@ Tag
     / Empty
 expression
     = Tag
-    / identifier
     / literal
     / Map
     / Array
+    / identifier
 
 internalfunction
     = k:("include"
@@ -170,11 +170,11 @@ internalfunction
 comparators
     = c:(
         "==" {return 'eq'; }
-      / "!=" {return 'neq'; }
-      / "<" {return 'lt'; }
-      / ">" {return 'gt'; }
+//      / "!=" {return 'neq'; }
       / "<=" {return 'lte'; }
       / ">=" {return 'gte'; }
+      / "<" {return 'lt'; }
+      / ">" {return 'gt'; }
       / "and" {return 'cmpand'; }
       / "or" {return 'cmpor'; }
       / "not" {return 'not';}
@@ -192,7 +192,7 @@ mathators
 
 callable
     = FnCreate
-    / internalfunction
-    / identifier
     / comparators
     / mathators
+    / internalfunction
+    / identifier
