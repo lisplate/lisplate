@@ -6,7 +6,6 @@ var Bluebird = require('bluebird');
 var readFile = Bluebird.promisify(fs.readFile);
 
 describe('Lisplate unit tests', function() {
-  var engine = null;
 
   describe('constructor', function() {
     it('should allow no option constructor', function() {
