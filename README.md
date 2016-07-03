@@ -4,12 +4,9 @@ Lisplate is a Lisp-like template engine with a reference implementation for Java
 
 ## Installing ##
 
-Currently, Lisplate is only supported with NodeJS.
-Browser support is planned for the initial release.
-
-Lisplate will be available on NPM once released. Currently, only pre-release versions are available.
+Lisplate is available on NPM.
 ```
-npm install lisplate@next
+npm install lisplate
 ```
 
 ## Getting Started ##
@@ -150,6 +147,7 @@ The syntax is similar to Clojure, but using `()` instead of `{}`.
 
 ```
 (:key value :two {+ 3 5} :myfn {fn (a b) {- a b}})
+(:)
 ```
 
 ### Raw ###
@@ -209,7 +207,7 @@ The standard math operators are available:
 ##### Comparisons #####
 
 The standard comparison operators are available:
-`==`, `!=`, `<`, `>`, `<=`, `>=`
+`==`, `<`, `>`, `<=`, `>=`
 
 The one exception is for the `not`, `and`, and `or`
 use the full work instead of the symbol notation.
