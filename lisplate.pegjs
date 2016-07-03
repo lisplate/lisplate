@@ -136,10 +136,12 @@ associativeitem
 Map
     = openarray ":" closearray
     { return ['map', []]; }
-    / openarray filler a:(e:associativeitem filler { return e; })* filler closearray
+    / openarray filler a:(e:associativeitem filler { return e; })+ filler closearray
     { return ['map', [a]]; }
 Array
-    = openarray filler a:(e:expression filler { return e; })* filler closearray
+    = openarray closearray
+    { return ['array', []]; }
+    / openarray filler a:(e:expression filler { return e; })+ filler closearray
     { return ['array', [a]]; }
 
 Empty
