@@ -214,6 +214,50 @@ describe('Lisplate unit tests', function() {
         });
     });
 
+    it('should reject with compiler errors', function(done) {
+      var templateName = 'testName';
+      var src = 'test';
+      var error = 'test error';
+
+      var engine = new Lisplate();
+      spyOn(engine, 'compile').and.throwError(error);
+
+      engine
+        .compileFn(templateName, src)
+        .then(function(fn) {
+          done.fail('Should have thrown error');
+        })
+        .catch(function(err) {
+          expect(engine.compile).toHaveBeenCalledTimes(1);
+          expect(err).not.toBeNull();
+          done();
+        });
+    });
+
+    it('should reject with load source errors', function(done) {
+      var templateName = 'testName';
+      var src = 'test';
+      var renderable = function(){ return 'test'; };
+      var renderableSource = renderable.toString();
+      var error = 'test error';
+
+      var engine = new Lisplate();
+      spyOn(engine, 'compile').and.returnValue(renderableSource);
+      spyOn(engine, 'loadCompiledSource').and.throwError(error);
+
+      engine
+        .compileFn(templateName, src)
+        .then(function(fn) {
+          done.fail('Should have thrown error');
+        })
+        .catch(function(err) {
+          expect(engine.compile).toHaveBeenCalledTimes(1);
+          expect(engine.loadCompiledSource).toHaveBeenCalledTimes(1);
+          expect(err).not.toBeNull();
+          done();
+        });
+    });
+
     it('should allow callback support with returns', function(done) {
       var templateName = 'testName';
       var src = 'test';
