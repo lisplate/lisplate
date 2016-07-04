@@ -1,2 +1,2 @@
 instrumentation:
-    excludes: ['benchmarktests/**', 'spec/**']
+    excludes: ['benchmarktests/**', 'lib/parser.js', 'spec/**']
