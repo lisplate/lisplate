@@ -26,12 +26,20 @@ Each instance may have different loaders, configuration, and run completely sepa
 In order to load templates,
 Lisplate requires a `sourceLoader` function to find and read the source to be compiled.
 
-Lisplate also provides a hook to load view models for templates using the
-`viewModelLoader` function.
+Lisplate also provides hooks to load view models for templates using the
+`viewModelLoader` function and strings using the `stringsLoader`.
 
-Both the `sourceLoader` and `viewModelLoader` may run synchronously or use a supplied callback.
-In the examples below, the `sourceLoader` is used asynchronously with a callback
-while the `viewModelLoad` is used synchronously.
+Each of the three hook points take only one parameter, the `templateName`.
+The `templateName` is the same that is passed to `loadTemplate`, `renderTemplate`,
+or as the key to the cache.
+
+The `sourceLoader` and `viewModelLoader` may use Promises, run synchronously,
+or use a supplied callback. If the hook takes a second argument, it is assumed
+to be asynchronous with a callback.
+
+In the examples below, the `sourceLoader` is used asynchronously with a callback,
+the `viewModelLoad` is used synchronously,
+and the `stringsLoader` is used as a Promise.
 
 ```
 var Lisplate = require('lisplate');
@@ -48,6 +56,12 @@ var engine = new Lisplate({
         } catch(e) {
         }
         return viewmodel;
+    },
+    stringsLoader: function(templateName) {
+        var readFileAsync = Bluebird.promisify(fs.readFile);
+
+        var filepath = path.resolve(myStringDirectory, templatePath + '.json');
+        return readFileAsync(filepath, 'UTF-8').then(JSON.parse);
     }
 });
 ```
@@ -125,6 +139,15 @@ The empty expression is mostly used for passing `null`-like values for parameter
 
 ```
 {}
+```
+
+### Comments ###
+
+Comments can be anywhere in code and are surrounded by `{*` and `*}`
+
+```
+{* comment *}
+{myfunction {* call with empty as parameter *} {}}
 ```
 
 ## Arrays ##
