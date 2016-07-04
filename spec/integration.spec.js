@@ -88,6 +88,7 @@ describe('Integration tests', function() {
           callback();
         })
         .catch(function(err) {
+          console.log(err);
           callback.fail('Catch should not be called with ' + err.message);
         });
     });

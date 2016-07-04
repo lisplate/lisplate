@@ -24,9 +24,9 @@ describe('Lisplate unit tests', function() {
       };
 
       var engine = new Lisplate(options);
-      expect(engine.sourceLoader).toEqual(options.sourceLoader);
-      expect(engine.viewModelLoader).toEqual(options.viewModelLoader);
-      expect(engine.stringsLoader).toEqual(options.stringsLoader);
+      expect(engine.sourceLoader).not.toBeNull();
+      expect(engine.viewModelLoader).not.toBeNull();
+      expect(engine.stringsLoader).not.toBeNull();
     });
   });
 
@@ -96,35 +96,126 @@ describe('Lisplate unit tests', function() {
           done.fail('Should not call then, expected error');
         })
         .catch(function(err) {
-          expect(err).not.toEqual(null);
+          expect(err).not.toBeNull();
           done();
         });
     });
 
-    it('should call sourceLoader when not cached', function() {
+    it('should call sourceLoader when not cached', function(done) {
       var src = '{if}';
-      var thenable = {
-        then: jasmine
-          .createSpy('thenable')
-          .and.callFake(function(then) {
-            then(src);
-          })
-      };
       var sourceLoader = jasmine
         .createSpy('sourceLoader')
-        .and.returnValue(thenable);
+        .and.returnValue(Promise.resolve(src));
 
       var engine = new Lisplate({
         sourceLoader: sourceLoader
       });
-      spyOn(engine, 'compileFn');
+      spyOn(engine, 'compileFn').and.returnValue('test');
 
-      engine.loadTemplate('test');
-      expect(sourceLoader).toHaveBeenCalledTimes(1);
-      expect(sourceLoader).toHaveBeenCalledWith('test');
-      expect(thenable.then).toHaveBeenCalledTimes(1);
-      expect(engine.compileFn).toHaveBeenCalledTimes(1);
-      expect(engine.compileFn).toHaveBeenCalledWith('test', src);
+      engine
+        .loadTemplate('test')
+        .then(function() {
+          expect(sourceLoader).toHaveBeenCalledTimes(1);
+          expect(sourceLoader).toHaveBeenCalledWith('test');
+          expect(engine.compileFn).toHaveBeenCalledTimes(1);
+          expect(engine.compileFn).toHaveBeenCalledWith('test', src);
+          done();
+        })
+        .catch(function(err) {
+          done.fail('Should not catch with error');
+        });
+    });
+    it('should error if promise sourceLoader errors', function(done) {
+      var src = '{if}';
+      var sourceLoader = jasmine
+        .createSpy('sourceLoader')
+        .and.returnValue(Promise.reject('some error'));
+
+      var engine = new Lisplate({
+        sourceLoader: sourceLoader
+      });
+      spyOn(engine, 'compileFn').and.returnValue('test');
+
+      engine
+        .loadTemplate('test')
+        .then(function() {
+          done.fail('Should not call then, expected error');
+        })
+        .catch(function(err) {
+          expect(err).not.toBeNull();
+          done();
+        });
+    });
+
+    it('should support sync sourceLoader', function(done) {
+      var src = '{if}';
+      var sourceLoader = jasmine
+        .createSpy('sourceLoader')
+        .and.returnValue(src);
+
+      var engine = new Lisplate({
+        sourceLoader: sourceLoader
+      });
+      spyOn(engine, 'compileFn').and.returnValue('test');
+
+      engine
+        .loadTemplate('test')
+        .then(function() {
+          expect(sourceLoader).toHaveBeenCalledTimes(1);
+          expect(sourceLoader).toHaveBeenCalledWith('test');
+          expect(engine.compileFn).toHaveBeenCalledTimes(1);
+          expect(engine.compileFn).toHaveBeenCalledWith('test', src);
+          done();
+        })
+        .catch(function(err) {
+          done.fail('Should not catch with error');
+        });
+    });
+
+    it('should support callback sourceLoader', function(done) {
+      var src = '{if}';
+      // jasmine spies fn.length is 0, so promisify fails
+      var sourceLoader = function(templateName, callback) {
+        callback(null, src);
+      };
+
+      var engine = new Lisplate({
+        sourceLoader: sourceLoader
+      });
+      spyOn(engine, 'compileFn').and.returnValue('test');
+
+      engine
+        .loadTemplate('test')
+        .then(function() {
+          expect(engine.compileFn).toHaveBeenCalledTimes(1);
+          expect(engine.compileFn).toHaveBeenCalledWith('test', src);
+          done();
+        })
+        .catch(function(err) {
+          done.fail('Should not catch with error');
+        });
+    });
+    it('should error if callback sourceLoader errors', function(done) {
+      var src = '{if}';
+      // jasmine spies fn.length is 0, so promisify fails
+      var sourceLoader = function(templateName, callback) {
+        callback('some error');
+      };
+
+      var engine = new Lisplate({
+        sourceLoader: sourceLoader
+      });
+      spyOn(engine, 'compileFn').and.returnValue('test');
+
+      engine
+        .loadTemplate('test')
+        .then(function() {
+          done.fail('Should not call then, expected error');
+        })
+        .catch(function(err) {
+          expect(err).not.toBeNull();
+          done();
+        });
     });
 
     it('should allow callback support with returns', function(done) {
@@ -213,6 +304,137 @@ describe('Lisplate unit tests', function() {
           done.fail('Should not catch with error');
         });
     });
+    it('should error if promise viewModelLoader errors', function(done) {
+      var templateName = 'testName';
+      var src = 'test';
+      var renderable = function(){ return 'test'; };
+      var renderableSource = renderable.toString();
+      var factory = jasmine.createSpy('renderableFactory').and.returnValue(renderable);
+
+      function MockClass() {
+      }
+
+      var engine = new Lisplate({
+        viewModelLoader: jasmine
+          .createSpy('viewModelLoader')
+          .and.returnValue(Promise.reject('some error'))
+      });
+      spyOn(engine, 'compile').and.returnValue(renderableSource);
+      spyOn(engine, 'loadCompiledSource').and.returnValue(factory);
+
+      engine
+        .compileFn(templateName, src)
+        .then(function(fn) {
+          done.fail('Should not have called then, expected error');
+        })
+        .catch(function(err) {
+          expect(err).not.toBeNull();
+          done();
+        });
+    });
+
+    it('should support sync viewModelLoader', function(done) {
+      var templateName = 'testName';
+      var src = 'test';
+      var renderable = function(){ return 'test'; };
+      var renderableSource = renderable.toString();
+      var factory = jasmine.createSpy('renderableFactory').and.returnValue(renderable);
+
+      function MockClass() {
+      }
+
+      var engine = new Lisplate({
+        viewModelLoader: jasmine
+          .createSpy('viewModelLoader')
+          .and.returnValue(MockClass)
+      });
+      spyOn(engine, 'compile').and.returnValue(renderableSource);
+      spyOn(engine, 'loadCompiledSource').and.returnValue(factory);
+
+      engine
+        .compileFn(templateName, src)
+        .then(function(fn) {
+          expect(engine.compile).toHaveBeenCalledTimes(1);
+          expect(engine.compile).toHaveBeenCalledWith(templateName, src);
+          expect(engine.loadCompiledSource).toHaveBeenCalledTimes(1);
+          expect(engine.loadCompiledSource).toHaveBeenCalledWith(renderableSource);
+          expect(factory).toHaveBeenCalledTimes(1);
+          expect(factory).toHaveBeenCalledWith(MockClass);
+          expect(fn.templateName).toEqual(templateName);
+          expect(fn).toEqual(renderable);
+          expect(engine.cache[templateName]).toEqual(renderable);
+          done();
+        })
+        .catch(function(err) {
+          done.fail('Should not catch with error');
+        });
+    });
+
+    it('should support callback viewModelLoader', function(done) {
+      var templateName = 'testName';
+      var src = 'test';
+      var renderable = function(){ return 'test'; };
+      var renderableSource = renderable.toString();
+      var factory = jasmine.createSpy('renderableFactory').and.returnValue(renderable);
+
+      function MockClass() {
+      }
+
+      var engine = new Lisplate({
+        viewModelLoader: function(templateName, callback) {
+          callback(null, MockClass);
+        }
+      });
+      spyOn(engine, 'compile').and.returnValue(renderableSource);
+      spyOn(engine, 'loadCompiledSource').and.returnValue(factory);
+
+      engine
+        .compileFn(templateName, src)
+        .then(function(fn) {
+          expect(engine.compile).toHaveBeenCalledTimes(1);
+          expect(engine.compile).toHaveBeenCalledWith(templateName, src);
+          expect(engine.loadCompiledSource).toHaveBeenCalledTimes(1);
+          expect(engine.loadCompiledSource).toHaveBeenCalledWith(renderableSource);
+          expect(factory).toHaveBeenCalledTimes(1);
+          expect(factory).toHaveBeenCalledWith(MockClass);
+          expect(fn.templateName).toEqual(templateName);
+          expect(fn).toEqual(renderable);
+          expect(engine.cache[templateName]).toEqual(renderable);
+          done();
+        })
+        .catch(function(err) {
+          done.fail('Should not catch with error');
+        });
+    });
+    it('should error if callback viewModelLoader errors', function(done) {
+      var templateName = 'testName';
+      var src = 'test';
+      var renderable = function(){ return 'test'; };
+      var renderableSource = renderable.toString();
+      var factory = jasmine.createSpy('renderableFactory').and.returnValue(renderable);
+
+      function MockClass() {
+      }
+
+      var engine = new Lisplate({
+        viewModelLoader: function(templateName, callback) {
+          callback('some error');
+        }
+      });
+      spyOn(engine, 'compile').and.returnValue(renderableSource);
+      spyOn(engine, 'loadCompiledSource').and.returnValue(factory);
+
+      engine
+        .compileFn(templateName, src)
+        .then(function(fn) {
+          done.fail('Should not have called then, expected error');
+        })
+        .catch(function(err) {
+          expect(err).not.toBeNull();
+          done();
+        });
+    });
+
 
     it('should reject with compiler errors', function(done) {
       var templateName = 'testName';
@@ -335,17 +557,103 @@ describe('Lisplate unit tests', function() {
       var renderable = jasmine.createSpy('renderable').and.returnValue(fakeData.stuff);
       var fakeStrings = {str: 'a-string'};
       var engine = new Lisplate({
-        stringsLoader: jasmine.createSpy('stringsLoader').and.returnValue(Promise.resolve(fakeStrings))
+        stringsLoader: jasmine
+          .createSpy('stringsLoader')
+          .and.returnValue(Promise.resolve(fakeStrings))
       });
-      engine.render(renderable, fakeData).then(function(out) {
-        expect(engine.stringsLoader).toHaveBeenCalledTimes(1);
-        expect(renderable).toHaveBeenCalledTimes(1);
-        expect(renderable).toHaveBeenCalledWith(engine, fakeData, fakeStrings, jasmine.any(Object));
-        expect(out).toEqual(fakeData.stuff);
-        done();
-      }).catch(function(err) {
-        done.fail('Should not catch with error');
+      engine
+        .render(renderable, fakeData)
+        .then(function(out) {
+          expect(renderable).toHaveBeenCalledTimes(1);
+          expect(renderable).toHaveBeenCalledWith(engine, fakeData, fakeStrings, jasmine.any(Object));
+          expect(out).toEqual(fakeData.stuff);
+          done();
+        })
+        .catch(function(err) {
+          done.fail('Should not catch with error');
+        });
+    });
+    it('should error if promise stringsLoader errors', function(done) {
+      var fakeData = {stuff: 'should show'};
+      var renderable = jasmine.createSpy('renderable').and.returnValue(fakeData.stuff);
+      var fakeStrings = {str: 'a-string'};
+      var engine = new Lisplate({
+        stringsLoader: jasmine
+          .createSpy('stringsLoader')
+          .and.returnValue(Promise.reject('some error'))
       });
+      engine
+        .render(renderable, fakeData)
+        .then(function(out) {
+          done.fail('Should not have called then, expected error');
+        })
+        .catch(function(err) {
+          expect(err).not.toBeNull();
+          done();
+        });
+    });
+
+    it('should support sync stringsLoader', function(done) {
+      var fakeData = {stuff: 'should show'};
+      var renderable = jasmine.createSpy('renderable').and.returnValue(fakeData.stuff);
+      var fakeStrings = {str: 'a-string'};
+      var engine = new Lisplate({
+        stringsLoader: jasmine
+          .createSpy('stringsLoader')
+          .and.returnValue(fakeStrings)
+      });
+      engine
+        .render(renderable, fakeData)
+        .then(function(out) {
+          expect(renderable).toHaveBeenCalledTimes(1);
+          expect(renderable).toHaveBeenCalledWith(engine, fakeData, fakeStrings, jasmine.any(Object));
+          expect(out).toEqual(fakeData.stuff);
+          done();
+        })
+        .catch(function(err) {
+          done.fail('Should not catch with error');
+        });
+    });
+
+    it('should support callback stringsLoader', function(done) {
+      var fakeData = {stuff: 'should show'};
+      var renderable = jasmine.createSpy('renderable').and.returnValue(fakeData.stuff);
+      var fakeStrings = {str: 'a-string'};
+      var engine = new Lisplate({
+        stringsLoader: function(templateName, callback) {
+          callback(null, fakeStrings);
+        }
+      });
+      engine
+        .render(renderable, fakeData)
+        .then(function(out) {
+          expect(renderable).toHaveBeenCalledTimes(1);
+          expect(renderable).toHaveBeenCalledWith(engine, fakeData, fakeStrings, jasmine.any(Object));
+          expect(out).toEqual(fakeData.stuff);
+          done();
+        })
+        .catch(function(err) {
+          done.fail('Should not catch with error');
+        });
+    });
+    it('should error if callback stringsLoader errors', function(done) {
+      var fakeData = {stuff: 'should show'};
+      var renderable = jasmine.createSpy('renderable').and.returnValue(fakeData.stuff);
+      var fakeStrings = {str: 'a-string'};
+      var engine = new Lisplate({
+        stringsLoader: function(templateName, callback) {
+          callback('some error');
+        }
+      });
+      engine
+        .render(renderable, fakeData)
+        .then(function(out) {
+          done.fail('Should not have called then, expected error');
+        })
+        .catch(function(err) {
+          expect(err).not.toBeNull();
+          done();
+        });
     });
 
     it('should allow callback support with return direct', function(done) {
