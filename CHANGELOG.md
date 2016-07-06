@@ -1,5 +1,18 @@
 # Changelog
 
+### v0.3.0 July 6, 2016 18:35:00 UTC+0
+- Added unit tests with jasmine
+- Increased code coverage to over 95%
+- Changed parts from CommonJS to UMD
+- Added core and full builds in dist folder targetting browsers
+- Can now use synchronous or callback style for sourceLoader, viewModelLoader, and stringsLoader
+- Fixed:
+    - Each with a thenable fails to execute
+    - If with a thenable does not print correctly all the time
+    - Comments cannot be used outside of another expression
+    - Load template does not accept a function for templateName
+    - compileFn continues to execute even after compiler errors
+
 ### v0.2.0 July 3, 2016 17:40:00 UTC+0
 - Added template-integration tests using jasmine
 - Added eslint for checks
