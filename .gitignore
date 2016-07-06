@@ -5,3 +5,4 @@ npm-debug.log*
 .grunt
 .npm
 .node_repl_history
+tmp

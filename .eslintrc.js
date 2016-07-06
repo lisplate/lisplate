@@ -3,7 +3,8 @@ module.exports = {
         "browser": true,
         "commonjs": true,
         "es6": true,
-        "node": true
+        "node": true,
+        "amd": true
     },
     "extends": "eslint:recommended",
     "rules": {
@@ -38,7 +39,7 @@ module.exports = {
         ],
         "no-shadow": [
             "error",
-            { "builtinGlobals": true,  "allow": ['callback', 'err'] }
+            { "builtinGlobals": true,  "allow": ['callback', 'err', 'root'] }
         ],
         "brace-style": [
             "error",
