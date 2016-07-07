@@ -1,8 +1,7 @@
 var parser = require('../lib/parser');
 var originalParser = parser.parse;
 
-var rewire = require('rewire');
-var compiler = rewire('../lib/compiler');
+var compiler = require('../lib/compiler');
 var pegSyntaxError = parser.SyntaxError;
 
 describe('Compiler unit tests', function() {
@@ -20,7 +19,7 @@ describe('Compiler unit tests', function() {
       };
 
       expect(function() {
-        compiler('test', 'src');
+        compiler.compile('test', 'src');
       }).toThrowError();
     });
 
@@ -32,7 +31,7 @@ describe('Compiler unit tests', function() {
       };
 
       expect(function() {
-        compiler('test', 'src');
+        compiler.compile('test', 'src');
       }).toThrowError(pegSyntaxError);
     });
 
@@ -42,7 +41,7 @@ describe('Compiler unit tests', function() {
       };
 
       expect(function() {
-        compiler('test', 'src');
+        compiler.compile('test', 'src');
       }).toThrowError(pegSyntaxError);
     });
 
@@ -52,7 +51,7 @@ describe('Compiler unit tests', function() {
       };
 
       expect(function() {
-        compiler('test', 'src');
+        compiler.compile('test', 'src');
       }).not.toThrowError();
     });
 
@@ -62,7 +61,7 @@ describe('Compiler unit tests', function() {
       };
 
       expect(function() {
-        compiler('test', 'src');
+        compiler.compile('test', 'src');
       }).toThrowError(pegSyntaxError);
     });
 
@@ -72,7 +71,7 @@ describe('Compiler unit tests', function() {
       };
 
       expect(function() {
-        compiler('test', 'src');
+        compiler.compile('test', 'src');
       }).toThrowError(pegSyntaxError);
     });
 
@@ -82,7 +81,7 @@ describe('Compiler unit tests', function() {
       };
 
       expect(function() {
-        compiler('test', 'src');
+        compiler.compile('test', 'src');
       }).toThrowError(pegSyntaxError);
     });
 
@@ -92,7 +91,7 @@ describe('Compiler unit tests', function() {
       };
 
       expect(function() {
-        compiler('test', 'src');
+        compiler.compile('test', 'src');
       }).toThrowError(pegSyntaxError);
     });
 
@@ -102,7 +101,7 @@ describe('Compiler unit tests', function() {
       };
 
       expect(function() {
-        compiler('test', 'src');
+        compiler.compile('test', 'src');
       }).toThrowError(pegSyntaxError);
     });
 
@@ -112,8 +111,16 @@ describe('Compiler unit tests', function() {
       };
 
       expect(function() {
-        compiler('test', 'src');
+        compiler.compile('test', 'src');
       }).toThrowError(pegSyntaxError);
+    });
+  });
+
+  describe('compileModule', function() {
+    it('should wrap compiled code', function() {
+      var src = 'test';
+      var out = compiler.compileModule('test', src);
+      expect(out).not.toEqual(src);
     });
   });
 
