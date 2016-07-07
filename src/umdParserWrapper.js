@@ -1,5 +1,5 @@
 (function(root, factory) {
-  if (typeof define === 'function' && define.amd && define.amd.dust === true) {
+  if (typeof define === 'function' && define.amd) {
     define('lisplate.parser', [], factory);
   } else if (typeof exports === 'object') {
     module.exports = factory();
