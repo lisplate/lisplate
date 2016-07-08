@@ -220,15 +220,28 @@ Lisplate will check if the variable is a function to be called or just output th
 ```
 
 By default, printing the contexts of a variable will be escaped per the HTML escape function.
-To disable automatic escaping, use a `!` before the identifier to print the contents as is.
+To disable automatic escaping, use a `safe` function before the identifier to print the contents as is.
 
 ```
-{!myRawContents}
-{!myFunction value}
+{safe myRawContents}
+{safe {myFunction value}}
 ```
 
-The automatic escaping only occurs for externally-defined functions.
+The automatic escaping only occurs for externally-defined variables and functions.
 Built-in functions do not escape their output nor do any functions defined in the template.
+
+The available escape functions are `escapeHtml`, `escapeJs`, and `escapeJson`.
+These may be called in the code at any time and compiled.
+Calling one, such as `escapeJs` will not cause the `escapeHtml` to be called.
+Declaring anything as "safe" will negate any later escapes.
+
+```
+{escapeHtml someHtml}
+{escapeJs someJs}
+{escapeJson someJson}
+
+{escapeHtml {safe doesNotGetEscaped}}}
+```
 
 #### Built-in functions ####
 
