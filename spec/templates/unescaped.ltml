@@ -1,3 +1,4 @@
+{safe {data::fn "hello world"}}{~n}
 {safe data::escape}{~n}
 {safe data::js}{~n}
 {safe data::json}{~n}{~n}

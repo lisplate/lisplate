@@ -1,3 +1,4 @@
+{data::fn "hello world"}{~n}
 {data::escape}{~n}
 {escapeJs data::js}{~n}
 {escapeJson data::json}{~n}
