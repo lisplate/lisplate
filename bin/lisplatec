@@ -68,6 +68,16 @@ function getDirectory(file) {
     }
 }
 
+function getTemplateName(file) {
+    var templateName = file.substring(basedir.length);
+    var index = templateName.indexOf('.');
+    if (index !== -1) {
+        return templateName.substring(0, index);
+    } else {
+        return templateName;
+    }
+}
+
 function makeDirectories(dir) {
     var parts = dir.split('/');
     var dirpath = parts[0];
@@ -103,7 +113,7 @@ function processDirectory(dir) {
 }
 
 function processFile(file) {
-    var templateName = file.substring(basedir.length);
+    var templateName = getTemplateName(file);
     var filepath = path.resolve(file);
     var outputpath = outdir + '/' + templateName + '.js';
     var templateDirectory = getDirectory(outputpath);
