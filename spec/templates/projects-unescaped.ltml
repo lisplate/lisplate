@@ -1,12 +1,12 @@
 <html>
     <head>
-        <title>{!data::title}</title>
+        <title>{safe data::title}</title>
     </head>
     <body>
-        <p>{!data::text}</p>
+        <p>{safe data::text}</p>
         {each data::projects {fn (project)
-            <a href="{!project.url}">{!project.name}</a>
-            <p>{!project.description}</p>
+            <a href="{safe project.url}">{safe project.name}</a>
+            <p>{safe project.description}</p>
         }
         "No projects"}
     </body>

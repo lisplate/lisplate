@@ -6,6 +6,8 @@
 {if {<= 5 5} "should show" "should not show"}{~n}
 {if {== 5 5} "should show" "should not show"}{~n}
 {if {== 5 3} "should not show" "should show"}{~n}
+{if {!= 5 3} "should show" "should not show"}{~n}
+{if {!= 5 5} "should not show" "should show"}{~n}
 {if {not {== 5 3}} "should show" "should not show"}{~n}
 {if {and {== 5 5} {> 5 3}} "should show" "should not show"}{~n}
 {if {and {== 5 5} {> 5 5}} "should not show" "should show"}{~n}

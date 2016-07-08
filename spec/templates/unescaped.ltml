@@ -1,1 +1,5 @@
-{!data::escape}
+{safe data::escape}{~n}
+{safe data::js}{~n}
+{safe data::json}{~n}{~n}
+{escapeJs {safe data::js}}{~n}
+{escapeJson {safe data::json}}

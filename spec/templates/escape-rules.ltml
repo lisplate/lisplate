@@ -1,9 +1,10 @@
-{{fn (renderColor renderColors)
+{{fn (test renderColor renderColors)
     <div className="colors">
-        Hello {data::name}
-        {renderColors data::colors renderColor}
+        Hello {test.name}
+        {renderColors test.colors renderColor}
     </div>
 }
+    (:name "Test" :colors ("red" "green" "blue"))
     {fn (color)
         <li className="color" style="background-color: {color}">
             {color}

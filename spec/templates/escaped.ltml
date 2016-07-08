@@ -1,1 +1,6 @@
-{data::escape}
+{data::escape}{~n}
+{escapeJs data::js}{~n}
+{escapeJson data::json}{~n}
+{escapeHtml ""}{~n}
+{escapeJs ""}{~n}
+{escapeJson ""}
