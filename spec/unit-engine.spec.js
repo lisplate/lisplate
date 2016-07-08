@@ -222,7 +222,7 @@ describe('Lisplate unit tests', function() {
           });
       });
 
-      it('should be able to use templateInfo.templateName with no .render', function(done) {
+      it('should be able to use templateInfo.templateName with no .renderFactory', function(done) {
         var src = '{if}';
         var compiledSource = 'function(){ return function(){} }';
         var factory = function(){ return function(){} };
@@ -304,7 +304,7 @@ describe('Lisplate unit tests', function() {
     });
 
     describe('object templateInfo - no compile', function() {
-      it('should error if templateInfo.templateName is empty with no render', function(done) {
+      it('should error if templateInfo.templateName is empty with no renderFactory', function(done) {
         var engine = new Lisplate();
 
         engine
@@ -317,13 +317,13 @@ describe('Lisplate unit tests', function() {
             done();
           });
       });
-      it('should error if templateInfo.templateName is empty with render', function(done) {
+      it('should error if templateInfo.templateName is empty with renderFactory', function(done) {
         var factory = function(){ return function(){} };
 
         var engine = new Lisplate();
 
         engine
-          .loadTemplate({templateName: '', render: factory})
+          .loadTemplate({templateName: '', renderFactory: factory})
           .then(function() {
             done.fail('Should not call then, expected error');
           })
@@ -332,7 +332,7 @@ describe('Lisplate unit tests', function() {
             done();
           });
       });
-      it('should use templateInfo.render', function(done) {
+      it('should use templateInfo.renderFactory', function(done) {
         var src = '{if}';
         var compiledSource = 'function(){ return function(){} }';
         var factory = function(){ return function(){} };
@@ -346,7 +346,7 @@ describe('Lisplate unit tests', function() {
         spyOn(engine, 'compile').and.returnValue(compiledSource);
 
         engine
-          .loadTemplate({templateName: 'test', render: factory})
+          .loadTemplate({templateName: 'test', renderFactory: factory})
           .then(function() {
             expect(sourceLoader).not.toHaveBeenCalled();
             expect(engine.compile).not.toHaveBeenCalled();
@@ -372,7 +372,7 @@ describe('Lisplate unit tests', function() {
         });
 
         engine
-          .loadTemplate({templateName: 'test', render: factory})
+          .loadTemplate({templateName: 'test', renderFactory: factory})
           .then(function(fn) {
             expect(factory).toHaveBeenCalledTimes(1);
             expect(factory).toHaveBeenCalledWith(engine, MockClass);
@@ -397,7 +397,7 @@ describe('Lisplate unit tests', function() {
         });
 
         engine
-          .loadTemplate({templateName: 'test', render: factory})
+          .loadTemplate({templateName: 'test', renderFactory: factory})
           .then(function(fn) {
             done.fail('Should not have called then, expected error');
           })
@@ -420,7 +420,7 @@ describe('Lisplate unit tests', function() {
         });
 
         engine
-          .loadTemplate({templateName: 'test', render: factory})
+          .loadTemplate({templateName: 'test', renderFactory: factory})
           .then(function(fn) {
             expect(factory).toHaveBeenCalledTimes(1);
             expect(factory).toHaveBeenCalledWith(engine, MockClass);
@@ -446,7 +446,7 @@ describe('Lisplate unit tests', function() {
         });
 
         engine
-          .loadTemplate({templateName: 'test', render: factory})
+          .loadTemplate({templateName: 'test', renderFactory: factory})
           .then(function(fn) {
             expect(factory).toHaveBeenCalledTimes(1);
             expect(factory).toHaveBeenCalledWith(engine, MockClass);
@@ -469,7 +469,7 @@ describe('Lisplate unit tests', function() {
         });
 
         engine
-          .loadTemplate({templateName: 'test', render: factory})
+          .loadTemplate({templateName: 'test', renderFactory: factory})
           .then(function(fn) {
             done.fail('Should not have called then, expected error');
           })
@@ -486,7 +486,7 @@ describe('Lisplate unit tests', function() {
         var engine = new Lisplate();
 
         engine
-          .loadTemplate({templateName: 'test', render: factory}, function(err, fn) {
+          .loadTemplate({templateName: 'test', renderFactory: factory}, function(err, fn) {
             expect(err).toBeNull();
             expect(factory).toHaveBeenCalledTimes(1);
             expect(engine.cache['test']).toEqual(renderable);
@@ -506,7 +506,7 @@ describe('Lisplate unit tests', function() {
         });
 
         engine
-          .loadTemplate({templateName: 'test', render: factory}, function(err) {
+          .loadTemplate({templateName: 'test', renderFactory: factory}, function(err) {
             expect(err).not.toBeNull();
             done();
           });

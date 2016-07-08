@@ -127,8 +127,8 @@ FnCreate
     { return withPosition(['fn', [p, b]]); }
 
 Call
-    = opentag filler s:"!"? c:callable filler p:paramset filler closetag
-    { return withPosition(['call', [c, p, !!s]]); }
+    = opentag filler c:callable filler p:paramset filler closetag
+    { return withPosition(['call', [c, p]]); }
 
 associativeitem
     = ":" k:key filler v:expression
@@ -163,6 +163,10 @@ expression
 
 internalfunction
     = k:("include"
+        / "safe"
+        / "escapeHtml"
+        / "escapeJson"
+        / "escapeJs"
         / "each"
         / "if"
         / "isEmpty"
@@ -172,7 +176,7 @@ internalfunction
 comparators
     = c:(
         "==" {return 'eq'; }
-//      / "!=" {return 'neq'; }
+      / "!=" {return 'neq'; }
       / "<=" {return 'lte'; }
       / ">=" {return 'gte'; }
       / "<" {return 'lt'; }
