@@ -2,6 +2,9 @@
   "name": "lisplate",
   "version": "0.3.0",
   "description": "Functional template engine based on Lisp-like syntax for JavaScript",
+  "bin": {
+    "lisplacec": "./bin/lisplacec"
+  },
   "main": "lib/index.js",
   "keywords": [
     "views",
@@ -23,7 +26,9 @@
     "url": "https://github.com/HallM/lisplate/issues"
   },
   "homepage": "https://github.com/HallM/lisplate",
-  "dependencies": {},
+  "dependencies": {
+    "cli": "^0.11.2"
+  },
   "devDependencies": {
     "bluebird": "^3.4.1",
     "coveralls": "^2.11.9",
