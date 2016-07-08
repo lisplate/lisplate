@@ -71,18 +71,27 @@ var engine = new Lisplate({
 ### function addHelper(name, fn) ###
 Adds the function `fn` to the helpers context identified by `name`.
 
-### function loadTemplate(templateName, [callback]) ###
-Loads a template and returns a function that can be executed by `render`.
-If the template is not cached, `loadTemplate` will use your `sourceLoader` to
-load the source to be compiled.
-This will use the compileFn function internally and cache the result.
-Returns a Promise that returns the renderable function.
-If a callback is passed, the callback will be used instead.
+### function loadTemplate(templateInfo, [callback]) ###
+Loads a template by name or a pre-compiled template.
 
-### function compileFn(templateName, src, [callback]) ###
-Compiles the `src` using `compile` and caches the result under `templateName`.
-Returns a Promise that returns the renderable function.
-If a callback is passed, the callback will be used instead.
+`templateInfo` may be an object with a `templateName` string and a
+`render` factory function. if the `render` function is missing
+and only a `templateName` exists, the `loadTemplate` will work as if
+`templateInfo` was a string (see below).
+
+`templateInfo` may be a string for the name of the template that will
+be loaded with the `sourceLoader` and compiled into a render factory.
+
+Once the render factory is loaded, the `viewModelLoader` is called
+if one exists. The render factory is used to generate the final renderable.
+The final renderable is cached using the `templateName` as the key.
+
+This function returns a promise which returns the renderable.
+The renderable can be passed to `render`.
+In most cases, you will want to use `renderTemplate` and pass a `templateName`.
+
+If a callback is passed, the callback is used to return instead of returning
+a promise.
 
 ### function compile(templateName, src) ###
 Compiles the `src`, attempts to load the view model class using `viewModelLoader`
