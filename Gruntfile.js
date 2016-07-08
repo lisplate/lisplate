@@ -35,11 +35,11 @@ module.exports = function(grunt) {
       },
       core: {
         src: ['src/emptyCompiler.js', 'lib/util.js', 'lib/runtime.js', 'lib/index.js'],
-        dest: 'tmp/lisplate-core.js'
+        dest: 'dist/lisplate-core.js'
       },
       full: {
         src: ['lib/parser.js', 'lib/compiler.js', 'lib/util.js', 'lib/runtime.js', 'lib/index.js'],
-        dest: 'tmp/lisplate-full.js'
+        dest: 'dist/lisplate-full.js'
       }
     },
 
@@ -61,7 +61,6 @@ module.exports = function(grunt) {
     },
 
     clean: {
-      tmpbuild: ['tmp/*'],
       dist: ['dist/*']
     }
   });
@@ -72,6 +71,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-peg');
 
   grunt.registerTask('buildParser', ['peg']);
-  grunt.registerTask('build', ['clean:tmpbuild', 'concat', 'uglify']);
+  grunt.registerTask('build', ['clean', 'concat', 'uglify']);
   grunt.registerTask('default', ['build']);
 };
