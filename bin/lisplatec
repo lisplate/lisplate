@@ -35,8 +35,6 @@ if (basedir.length && basedir[basedir.length-1] !== '/') {
     basedir += '/';
 }
 
-console.log(files);
-
 files.forEach(function(file) {
     if (!startsWith(file, basedir)) {
         cli.fatal('The path `' + file + '` is not within the basedir, `' + basedir + '`');
