@@ -161,18 +161,6 @@ expression
     / Array
     / identifier
 
-internalfunction
-    = k:("include"
-        / "safe"
-        / "escapeHtml"
-        / "escapeJson"
-        / "escapeJs"
-        / "each"
-        / "if"
-        / "isEmpty"
-        / "isNotEmpty")
-    { return ['internal', [k]]; }
-
 comparators
     = c:(
         "==" {return 'eq'; }
@@ -185,7 +173,7 @@ comparators
       / "or" {return 'cmpor'; }
       / "not" {return 'not';}
     )
-    { return ['internal', [c]]; }
+    { return ['identifier', [null, c]]; }
 mathators
     = c:(
         "+" {return 'add'; }
@@ -194,11 +182,10 @@ mathators
       / "/" {return 'div'; }
       / "%" {return 'mod'; }
     )
-    { return ['internal', [c]]; }
+    { return ['identifier', [null, c]]; }
 
 callable
     = FnCreate
     / comparators
     / mathators
-    / internalfunction
     / identifier

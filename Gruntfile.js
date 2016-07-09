@@ -34,11 +34,11 @@ module.exports = function(grunt) {
         stripBanners: true
       },
       core: {
-        src: ['src/emptyCompiler.js', 'lib/util.js', 'lib/runtime.js', 'lib/index.js'],
+        src: ['lib/util.js', 'lib/runtime.js', 'lib/index.js'],
         dest: 'dist/lisplate-core.js'
       },
       full: {
-        src: ['lib/parser.js', 'lib/compiler.js', 'lib/util.js', 'lib/runtime.js', 'lib/index.js'],
+        src: ['lib/util.js', 'lib/runtime.js', 'lib/index.js', 'lib/parser.js', 'lib/compiler.js'],
         dest: 'dist/lisplate-full.js'
       }
     },
