@@ -1,6 +1,9 @@
+var Module = require('module');
+
 var parser = require('../lib/parser');
 var originalParser = parser.parse;
 
+var Lisplate = require('../lib/')
 var compiler = require('../lib/compiler');
 var pegSyntaxError = parser.SyntaxError;
 
@@ -117,10 +120,29 @@ describe('Compiler unit tests', function() {
   });
 
   describe('compileModule', function() {
-    it('should wrap compiled code', function() {
+    it('should wrap compiled code', function(done) {
       var src = 'test';
       var out = compiler.compileModule('test', src);
       expect(out).not.toEqual(src);
+
+      var targetPath = __dirname + '/out/test';
+      var targetModule = new Module(targetPath, module.parent);
+      targetModule._compile(out, targetPath);
+
+      var engine = new Lisplate();
+      engine
+        .loadTemplate(targetModule.exports)
+        .then(function(fn) {
+          return engine.render(fn, null);
+        })
+        .then(function(rendered) {
+          expect(rendered).toEqual('test');
+          done();
+        })
+        .catch(function(err) {
+          done.fail('Catch should not be called with error');
+        });
+      done();
     });
   });
 
