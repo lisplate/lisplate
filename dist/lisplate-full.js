@@ -1,4 +1,4 @@
-/*! lisplate - v0.4.0
+/*! lisplate - v0.4.1
 * https://github.com/HallM/lisplate
 * Copyright (c) 2016 ; Released under the MIT License */
 (function(root, factory) {
@@ -375,10 +375,6 @@
   }
 
   function _promisifyPossibleAsync(fn) {
-    if (!fn) {
-      return fn;
-    }
-
     var fnArgCount = fn.length;
     return function() {
       var args = Array.prototype.slice.apply(arguments);
@@ -413,9 +409,9 @@
     // cacheEnabled must be explicitly set to false to disable
     this.cacheEnabled = !(options.cacheEnabled === false);
 
-    this.sourceLoader = _promisifyPossibleAsync(options.sourceLoader);
-    this.viewModelLoader = _promisifyPossibleAsync(options.viewModelLoader);
-    this.stringsLoader = _promisifyPossibleAsync(options.stringsLoader);
+    this.sourceLoader = options.sourceLoader;
+    this.viewModelLoader = options.viewModelLoader;
+    this.stringsLoader = options.stringsLoader;
 
     this.helpers = {};
     this.cache = {};
@@ -456,8 +452,8 @@
         return Promise.reject('Compiler is not loaded to compile loaded source');
       }
 
-      renderFactory = _self
-        .sourceLoader(templateName)
+      renderFactory = _promisifyPossibleAsync(_self
+        .sourceLoader)(templateName)
         .then(function(src) {
           var compiled = null;
           var factory = null;
@@ -476,7 +472,7 @@
     return renderFactory.then(function(factory) {
       var promise = null;
       if (_self.viewModelLoader) {
-        promise = _self.viewModelLoader(templateName);
+        promise = _promisifyPossibleAsync(_self.viewModelLoader)(templateName);
       } else {
         promise = Promise.resolve(null);
       }
@@ -493,8 +489,8 @@
   Lisplate.prototype.render = _callbackify(function render(template, data) {
     var _self = this;
     if (_self.stringsLoader) {
-      return _self
-        .stringsLoader(template.templateName)
+      return _promisifyPossibleAsync(_self
+        .stringsLoader)(template.templateName)
         .then(function(strings) {
           return template(data, strings, Lisplate.Runtime);
         });

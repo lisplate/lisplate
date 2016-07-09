@@ -1,5 +1,8 @@
 # Changelog
 
+### v0.4.1 July 9, 2016 20:10:00 UTC+0
+- Adjust internal API to allow changing the source/viewModel/strings-Loaders
+
 ### v0.4.0 July 9, 2016 03:35:00 UTC+0
 - Massive refactoring to much of the code
     - Compiler now depends on Lisplate-core, instead of the other way
