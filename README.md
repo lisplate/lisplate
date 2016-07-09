@@ -16,6 +16,10 @@ npm install lisplate
 
 Once you have lisplate installed, you can require it in like any other module.
 
+For the browser side, Lisplate provides lisplate-core and lisplate-full bundles.
+The lisplate-core bundle includes only the core and does not include the
+compiler. The lisplate-full bundle includes the compiler as well as the core.
+
 Lisplate does require a global Promise to be set up. Native ES6 promises are supported
 along with any Promise polyfill or setting global.Promise to the implementation
 of your choice.
@@ -66,6 +70,12 @@ var engine = new Lisplate({
 });
 ```
 
+## Compiling ahead of time ##
+
+The compiler can be used to compile templates ahead of time into UMD modules.
+These modules support AMD and CommonJS loaders as well as being included
+in browser script tags.
+
 ## Lisplate Instance API ##
 
 ### function addHelper(name, fn) ###
@@ -93,10 +103,6 @@ In most cases, you will want to use `renderTemplate` and pass a `templateName`.
 If a callback is passed, the callback is used to return instead of returning
 a promise.
 
-### function compile(templateName, src) ###
-Compiles the `src`, attempts to load the view model class using `viewModelLoader`
-and returns a function that can be passed to `render`.
-
 ### function render(template, data, [callback]) ###
 Renders a template from the `template` function.
 May return a string or a Promise if the template requires asynchronous handling.
@@ -106,6 +112,16 @@ If a callback is passed, the callback will be used instead.
 Similar to `render`, but accepts a `templateName` to determine which template to load
 and render. If `templateName` is a function, the function is used as the template function
 passed to `render`. The output is the same as the `render` function.
+
+## Lisplate.Compiler ##
+
+### function compile(templateName, src) ###
+Compiles the `src` and returns a render-factory function that can be passed to `loadTemplate`.
+The compiled code must be loaded before the template can be rendered.
+
+### function compileMpdule(templateName, src) ###
+Runs the `compile` function and returns a UMD wrapped template.
+
 
 ## Syntax ##
 
