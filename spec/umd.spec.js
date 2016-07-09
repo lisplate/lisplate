@@ -1,8 +1,8 @@
-var compiler = require('../lib/compiler');
+var utils = require('../lib/util');
+var runtime = require('../lib/runtime');
 var Lisplate = require('../lib/index');
 var parser = require('../lib/parser');
-var runtime = require('../lib/runtime');
-var utils = require('../lib/util');
+var compiler = require('../lib/compiler');
 
 var amdModules = {
   'lisplate.core': Lisplate,
@@ -13,10 +13,6 @@ var amdModules = {
 };
 var globalModules = {
   'Lisplate': Lisplate,
-  'lisplateParser': parser,
-  'lisplateCompiler': compiler,
-  'lisplateRuntime': runtime,
-  'lisplateUtils': utils
 };
 
 var fs = require('fs');
@@ -51,14 +47,7 @@ function runTest(filename, isAmd) {
 
     ctx.define = define;
   } else {
-    // deps.forEach(function(d) {
-    //   ctx[d] = globalModules[d];
-    // });
     ctx.Lisplate = Lisplate;
-    ctx.lisplateParser = parser;
-    ctx.lisplateCompiler = compiler;
-    ctx.lisplateRuntime = runtime;
-    ctx.lisplateUtils = utils;
   }
 
   vm.runInNewContext(src, ctx, {
@@ -94,7 +83,7 @@ var umdFiles = ['compiler', 'parser', 'index', 'runtime', 'util'];
 describe('Verify UMD:', function() {
 
   umdFiles.forEach(function(f) {
-    describe('compiler', function() {
+    describe(f, function() {
       it('should support AMD', function() {
         runTest(f, true);
       });
