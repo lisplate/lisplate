@@ -1,5 +1,19 @@
 # Changelog
 
+### v0.4.0 July 9, 2016 03:35:00 UTC+0
+- Massive refactoring to much of the code
+    - Compiler now depends on Lisplate-core, instead of the other way
+    - Adjusted many of the internal names
+    - Exposing internals such as Chunk and Runtime
+- Changed how module loading and compiling occurs
+- Added a pre-compiler script
+- Changed how `safe` works, by using a functional approach instead of sigils
+- Moved internal-runtime function knowledge to compiler instead of parser
+- Fixed:
+    - thenable check is not fully A+ compliant
+- Added unit tests to validate UMD
+- Added unit test to validate compiling modules
+
 ### v0.3.0 July 6, 2016 18:35:00 UTC+0
 - Added unit tests with jasmine
 - Increased code coverage to over 95%
