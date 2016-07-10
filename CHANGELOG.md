@@ -1,5 +1,8 @@
 # Changelog
 
+### v0.4.2 July 10, 2016 20:40:00 UTC+0
+- Fixing typo in packagejson breaking compiler
+
 ### v0.4.1 July 9, 2016 20:10:00 UTC+0
 - Adjust internal API to allow changing the source/viewModel/strings-Loaders
 
