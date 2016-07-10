@@ -12,7 +12,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/HallM/lisplate.git"
+    "url": "https://github.com/lisplate/lisplate.git"
   },
   "scripts": {
     "build-parser": "pegjs lisplate.pegjs lib/parser.js",
@@ -23,9 +23,9 @@
   "author": "Matthew Hall <mdhall@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/HallM/lisplate/issues"
+    "url": "https://github.com/lisplate/lisplate/issues"
   },
-  "homepage": "https://github.com/HallM/lisplate",
+  "homepage": "https://github.com/lisplate/lisplate",
   "dependencies": {
     "cli": "^0.11.2"
   },
