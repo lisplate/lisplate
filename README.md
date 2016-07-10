@@ -1,7 +1,8 @@
 # Lisplate template engine #
 
-[![Build Status](https://travis-ci.org/HallM/lisplate.svg?branch=master)](https://travis-ci.org/HallM/lisplate)
-[![Coverage Status](https://coveralls.io/repos/github/HallM/lisplate/badge.svg?branch=master)](https://coveralls.io/github/HallM/lisplate?branch=master)
+[![npm version](https://badge.fury.io/js/lisplate.svg)](https://badge.fury.io/js/lisplate)
+[![Build Status](https://travis-ci.org/lisplate/lisplate.svg?branch=master)](https://travis-ci.org/lisplate/lisplate)
+[![Coverage Status](https://coveralls.io/repos/github/lisplate/lisplate/badge.svg?branch=master)](https://coveralls.io/github/lisplate/lisplate?branch=master)
 
 Lisplate is a Lisp-like template engine with a reference implementation for JavaScript.
 
