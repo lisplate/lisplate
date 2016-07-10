@@ -1,4 +1,4 @@
-/*! lisplate - v0.4.1
+/*! lisplate - v0.4.2
 * https://github.com/HallM/lisplate
 * Copyright (c) 2016 ; Released under the MIT License */
 (function(root, factory) {
