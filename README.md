@@ -251,7 +251,7 @@ Lisplate will check if the variable is a function to be called or just output th
 {noParamFunction}
 ```
 
-By default, printing the contexts of a variable will be escaped per the HTML escape function.
+By default, printing the contents of a variable will be escaped per the HTML escape function.
 To disable automatic escaping, use a `safe` function before the identifier to print the contents as is.
 
 ```
@@ -279,18 +279,42 @@ Declaring anything as "safe" will negate any later escapes.
 
 Lisplate provides a number of built-in functions.
 
+##### Binary Operators: Math and Comparisons #####
+
+Binary operators are used in a prefix notation similar to Lisp.
+Lisplate does not use order of operations.
+The order must be defined within each operator call.
+
+```
+{+ 3 4}
+7
+
+{< {- 4 3} {* {+ 5 2} 7}
+true (1 < 49)
+```
+
 ##### Math #####
 
 The standard math operators are available:
+
 `+`, `-`, `*`, `/`, `%`
+
+Each can also be called by the internal names, which the operators are aliases for:
+
+`add`, `sub`, `mul`, `div`, `mod`
 
 ##### Comparisons #####
 
 The standard comparison operators are available:
-`==`, `<`, `>`, `<=`, `>=`
+
+`==`, `!=`, `<`, `>`, `<=`, `>=`
+
+Each can also be called by the internal names, which the operators are aliases for:
+
+`eq`, `neq`, `lt`, `gt`, `lte`, `gte`
 
 The one exception is for the `not`, `and`, and `or`
-use the full work instead of the symbol notation.
+use the full word instead of the symbol notation.
 
 ##### if #####
 
@@ -355,67 +379,46 @@ Parameters passed to the include call will be passed to the template.
 {include "my-other-template" valueOne valueTwo}
 ```
 
-##### Binary Operators: Math and Comparisons #####
+### Namespaces ###
 
-Binary operators are used in a prefix notation similar to Lisp.
-Lisplate does not use order of operations.
-The order must be defined within each operator call.
-
+Namespaces are special variables that provide access to template parameters and view models.
+Namespaces can be used to access variables even if the variable name is used as a parameter.
+To select a namespace for an identifier, put the namespace label and a colon before the identifier.
+Namespaces and fields on a namespace are protected and can not be overriden by internal scopes.
 ```
-{+ 3 4}
-7
-
-{< {- 4 3} {* {+ 5 2} 7}
-true (1 < 49)
-```
-
-Supported operators:
-* `*`
-* `/`
-* `%`
-* `+`
-* `-`
-
-* `==`
-* `!=`
-* `<`
-* `>`
-* `>=`
-* `<=`
-
-### Contexts ###
-
-Contexts are special variables that provide access to template parameters and view models.
-Contexts can be used to access variables even if the variable name is used as a parameter.
-To select a context for an identifier, put the context label and a colon before the identifier.
-Contexts and fields on a context are protected and can not be overriden by internal scopes.
-```
-Context:Identifier
+Namespace::Identifier
 ```
 ```
-{data:myParameter}
-{helper:myHelper}
-{viewmodel:myViewModelItem}
-{strings:someString}
-{each data:myArray {fn (myItem)
+{data::myParameter}
+{helper::myHelper}
+{viewmodel::myViewModelItem}
+{strings::someString}
+{each data::myArray {fn (myItem)
   This is the array item: {myItem}
-  This is the data item: {data:myItem}
+  This is the data item: {data::myItem}
 }}
 ```
 
-Built in functions are on the `runtime` context, but are accessible without a context specifier.
+Built in functions are on the `runtime` namespace, but are accessible without a namespace specifier.
 
-Added helper functions are in the `helper` context.
+Added helper functions are in the `helper` namespace.
 
-Data sent to the template via an include or through rendering is in the `data` context.
+Data sent to the template via an include or through rendering is in the `data` namespace.
 
-View model fields are accessible in the `viewmodel` context.
+View model fields are accessible in the `viewmodel` namespace.
 
-Fields in the strings file are accessible in the `strings` context.
+Fields in the strings file are accessible in the `strings` namespace.
 
-**Coming soon**: Currently Lisplate does not search contexts.
-Before 1.0, a template should be capable of searching contexts (parameters and viewmodel).
-Specifying a context will avoid the search and may be faster.
+Not specifying a namespace will perform the following searches attempting to locate the identifier:
+
+1. an internal function?
+2. declared as a parameter to a parent block/function?
+3. perform a search in the following order:
+   1. viewmodel
+   2. data
+   3. helpers
+   4. strings
+   5. render-context
 
 ### Creating Functions ###
 
@@ -463,7 +466,7 @@ This is the same behavior as in normal JavaScript. The same workarounds apply he
 The most common occurances revolve around the `if` and `each`, which usually
 expect functions to be passed in to execute.
 ```
-{if myValue myObject.myFnCall} {* this context will not be the expected one *}
+{if myValue myObject.myFnCall} {* "this" context will not be the expected one *}
 ```
 
 1. Pre-bind the function in your data or viewmodel before passing into Lisplate
