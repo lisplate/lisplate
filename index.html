@@ -1,35 +1,42 @@
 <!DOCTYPE html>
 <html>
+
   <head>
     <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+    <meta name="description" content="Lisplate : Functional template engine based on Lisp-like syntax for JavaScript">
 
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
 
-    <title>Lisplate by HallM</title>
+    <title>Lisplate</title>
   </head>
 
   <body>
-    <header>
-      <div class="inner">
-        <h1>Lisplate</h1>
-        <h2>Functional template engine based on Lisp-like syntax for JavaScript</h2>
-        <a href="https://github.com/HallM/lisplate" class="button"><small>View project on</small> GitHub</a>
-      </div>
-    </header>
 
-    <div id="content-wrapper">
-      <div class="inner clearfix">
-        <section id="main-content">
-          <h1>
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/lisplate/lisplate">View on GitHub</a>
+
+          <h1 id="project_title">Lisplate</h1>
+          <h2 id="project_tagline">Functional template engine based on Lisp-like syntax for JavaScript</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/lisplate/lisplate/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/lisplate/lisplate/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
 <a id="lisplate-template-engine" class="anchor" href="#lisplate-template-engine" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Lisplate template engine</h1>
+
+<p><a href="https://badge.fury.io/js/lisplate"><img src="https://badge.fury.io/js/lisplate.svg" alt="npm version"></a>
+<a href="https://travis-ci.org/lisplate/lisplate"><img src="https://travis-ci.org/lisplate/lisplate.svg?branch=master" alt="Build Status"></a>
+<a href="https://coveralls.io/github/lisplate/lisplate?branch=master"><img src="https://coveralls.io/repos/github/lisplate/lisplate/badge.svg?branch=master" alt="Coverage Status"></a></p>
 
 <p>Lisplate is a Lisp-like template engine with a reference implementation for JavaScript.</p>
 
@@ -46,6 +53,10 @@
 
 <p>Once you have lisplate installed, you can require it in like any other module.</p>
 
+<p>For the browser side, Lisplate provides lisplate-core and lisplate-full bundles.
+The lisplate-core bundle includes only the core and does not include the
+compiler. The lisplate-full bundle includes the compiler as well as the core.</p>
+
 <p>Lisplate does require a global Promise to be set up. Native ES6 promises are supported
 along with any Promise polyfill or setting global.Promise to the implementation
 of your choice.</p>
@@ -56,12 +67,20 @@ Each instance may have different loaders, configuration, and run completely sepa
 <p>In order to load templates,
 Lisplate requires a <code>sourceLoader</code> function to find and read the source to be compiled.</p>
 
-<p>Lisplate also provides a hook to load view models for templates using the
-<code>viewModelLoader</code> function.</p>
+<p>Lisplate also provides hooks to load view models for templates using the
+<code>viewModelLoader</code> function and strings using the <code>stringsLoader</code>.</p>
 
-<p>Both the <code>sourceLoader</code> and <code>viewModelLoader</code> may run synchronously or use a supplied callback.
-In the examples below, the <code>sourceLoader</code> is used asynchronously with a callback
-while the <code>viewModelLoad</code> is used synchronously.</p>
+<p>Each of the three hook points take only one parameter, the <code>templateName</code>.
+The <code>templateName</code> is the same that is passed to <code>loadTemplate</code>, <code>renderTemplate</code>,
+or as the key to the cache.</p>
+
+<p>The <code>sourceLoader</code> and <code>viewModelLoader</code> may use Promises, run synchronously,
+or use a supplied callback. If the hook takes a second argument, it is assumed
+to be asynchronous with a callback.</p>
+
+<p>In the examples below, the <code>sourceLoader</code> is used asynchronously with a callback,
+the <code>viewModelLoad</code> is used synchronously,
+and the <code>stringsLoader</code> is used as a Promise.</p>
 
 <pre><code>var Lisplate = require('lisplate');
 var engine = new Lisplate({
@@ -77,9 +96,22 @@ var engine = new Lisplate({
         } catch(e) {
         }
         return viewmodel;
+    },
+    stringsLoader: function(templateName) {
+        var readFileAsync = Bluebird.promisify(fs.readFile);
+
+        var filepath = path.resolve(myStringDirectory, templatePath + '.json');
+        return readFileAsync(filepath, 'UTF-8').then(JSON.parse);
     }
 });
 </code></pre>
+
+<h2>
+<a id="compiling-ahead-of-time" class="anchor" href="#compiling-ahead-of-time" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Compiling ahead of time</h2>
+
+<p>The compiler can be used to compile templates ahead of time into UMD modules.
+These modules support AMD and CommonJS loaders as well as being included
+in browser script tags.</p>
 
 <h2>
 <a id="lisplate-instance-api" class="anchor" href="#lisplate-instance-api" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Lisplate Instance API</h2>
@@ -90,27 +122,28 @@ var engine = new Lisplate({
 <p>Adds the function <code>fn</code> to the helpers context identified by <code>name</code>.</p>
 
 <h3>
-<a id="function-loadtemplatetemplatename-callback" class="anchor" href="#function-loadtemplatetemplatename-callback" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>function loadTemplate(templateName, [callback])</h3>
+<a id="function-loadtemplatetemplateinfo-callback" class="anchor" href="#function-loadtemplatetemplateinfo-callback" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>function loadTemplate(templateInfo, [callback])</h3>
 
-<p>Loads a template and returns a function that can be executed by <code>render</code>.
-If the template is not cached, <code>loadTemplate</code> will use your <code>sourceLoader</code> to
-load the source to be compiled.
-This will use the compileFn function internally and cache the result.
-Returns a Promise that returns the renderable function.
-If a callback is passed, the callback will be used instead.</p>
+<p>Loads a template by name or a pre-compiled template.</p>
 
-<h3>
-<a id="function-compilefntemplatename-src-callback" class="anchor" href="#function-compilefntemplatename-src-callback" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>function compileFn(templateName, src, [callback])</h3>
+<p><code>templateInfo</code> may be an object with a <code>templateName</code> string and a
+<code>render</code> factory function. if the <code>render</code> function is missing
+and only a <code>templateName</code> exists, the <code>loadTemplate</code> will work as if
+<code>templateInfo</code> was a string (see below).</p>
 
-<p>Compiles the <code>src</code> using <code>compile</code> and caches the result under <code>templateName</code>.
-Returns a Promise that returns the renderable function.
-If a callback is passed, the callback will be used instead.</p>
+<p><code>templateInfo</code> may be a string for the name of the template that will
+be loaded with the <code>sourceLoader</code> and compiled into a render factory.</p>
 
-<h3>
-<a id="function-compiletemplatename-src" class="anchor" href="#function-compiletemplatename-src" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>function compile(templateName, src)</h3>
+<p>Once the render factory is loaded, the <code>viewModelLoader</code> is called
+if one exists. The render factory is used to generate the final renderable.
+The final renderable is cached using the <code>templateName</code> as the key.</p>
 
-<p>Compiles the <code>src</code>, attempts to load the view model class using <code>viewModelLoader</code>
-and returns a function that can be passed to <code>render</code>.</p>
+<p>This function returns a promise which returns the renderable.
+The renderable can be passed to <code>render</code>.
+In most cases, you will want to use <code>renderTemplate</code> and pass a <code>templateName</code>.</p>
+
+<p>If a callback is passed, the callback is used to return instead of returning
+a promise.</p>
 
 <h3>
 <a id="function-rendertemplate-data-callback" class="anchor" href="#function-rendertemplate-data-callback" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>function render(template, data, [callback])</h3>
@@ -125,6 +158,20 @@ If a callback is passed, the callback will be used instead.</p>
 <p>Similar to <code>render</code>, but accepts a <code>templateName</code> to determine which template to load
 and render. If <code>templateName</code> is a function, the function is used as the template function
 passed to <code>render</code>. The output is the same as the <code>render</code> function.</p>
+
+<h2>
+<a id="lisplatecompiler" class="anchor" href="#lisplatecompiler" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Lisplate.Compiler</h2>
+
+<h3>
+<a id="function-compiletemplatename-src" class="anchor" href="#function-compiletemplatename-src" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>function compile(templateName, src)</h3>
+
+<p>Compiles the <code>src</code> and returns a render-factory function that can be passed to <code>loadTemplate</code>.
+The compiled code must be loaded before the template can be rendered.</p>
+
+<h3>
+<a id="function-compilempduletemplatename-src" class="anchor" href="#function-compilempduletemplatename-src" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>function compileMpdule(templateName, src)</h3>
+
+<p>Runs the <code>compile</code> function and returns a UMD wrapped template.</p>
 
 <h2>
 <a id="syntax" class="anchor" href="#syntax" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Syntax</h2>
@@ -173,8 +220,17 @@ false
 <pre><code>{}
 </code></pre>
 
-<h2>
-<a id="arrays" class="anchor" href="#arrays" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Arrays</h2>
+<h3>
+<a id="comments" class="anchor" href="#comments" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Comments</h3>
+
+<p>Comments can be anywhere in code and are surrounded by <code>{*</code> and <code>*}</code></p>
+
+<pre><code>{* comment *}
+{myfunction {* call with empty as parameter *} {}}
+</code></pre>
+
+<h3>
+<a id="arrays" class="anchor" href="#arrays" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Arrays</h3>
 
 <p>The array expression allows creation of standard arrays.
 Arrays may contain anything using expressions.
@@ -185,8 +241,8 @@ similar to function parameters.</p>
 ()
 </code></pre>
 
-<h2>
-<a id="associative-arrays--maps" class="anchor" href="#associative-arrays--maps" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Associative Arrays / Maps</h2>
+<h3>
+<a id="associative-arrays--maps" class="anchor" href="#associative-arrays--maps" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Associative Arrays / Maps</h3>
 
 <p>Associative arrays expression creates a key to value map.
 The values can be from any expression.
@@ -197,6 +253,22 @@ The syntax is similar to Clojure, but using <code>()</code> instead of <code>{}<
 
 <pre><code>(:key value :two {+ 3 5} :myfn {fn (a b) {- a b}})
 (:)
+</code></pre>
+
+<h3>
+<a id="dynamic-key-lookup" class="anchor" href="#dynamic-key-lookup" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Dynamic Key Lookup</h3>
+
+<p>Looking up a value using a key on an associative array or a normal array uses <code>get</code>.</p>
+
+<pre><code>{get myArray 0}
+{get myArray index}
+{get myObject "myKey"}
+{get myObject dynamicKey}
+</code></pre>
+
+<p><code>get</code> can also be used without a key to return the value of something.</p>
+
+<pre><code>{get myValue}
 </code></pre>
 
 <h3>
@@ -234,15 +306,27 @@ Lisplate will check if the variable is a function to be called or just output th
 {noParamFunction}
 </code></pre>
 
-<p>By default, printing the contexts of a variable will be escaped per the HTML escape function.
-To disable automatic escaping, use a <code>!</code> before the identifier to print the contents as is.</p>
+<p>By default, printing the contents of a variable will be escaped per the HTML escape function.
+To disable automatic escaping, use a <code>safe</code> function before the identifier to print the contents as is.</p>
 
-<pre><code>{!myRawContents}
-{!myFunction value}
+<pre><code>{safe myRawContents}
+{safe {myFunction value}}
 </code></pre>
 
-<p>The automatic escaping only occurs for externally-defined functions.
+<p>The automatic escaping only occurs for externally-defined variables and functions.
 Built-in functions do not escape their output nor do any functions defined in the template.</p>
+
+<p>The available escape functions are <code>escapeHtml</code>, <code>escapeJs</code>, and <code>escapeJson</code>.
+These may be called in the code at any time and compiled.
+Calling one, such as <code>escapeJs</code> will not cause the <code>escapeHtml</code> to be called.
+Declaring anything as "safe" will negate any later escapes.</p>
+
+<pre><code>{escapeHtml someHtml}
+{escapeJs someJs}
+{escapeJson someJson}
+
+{escapeHtml {safe doesNotGetEscaped}}}
+</code></pre>
 
 <h4>
 <a id="built-in-functions" class="anchor" href="#built-in-functions" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Built-in functions</h4>
@@ -250,19 +334,43 @@ Built-in functions do not escape their output nor do any functions defined in th
 <p>Lisplate provides a number of built-in functions.</p>
 
 <h5>
+<a id="binary-operators-math-and-comparisons" class="anchor" href="#binary-operators-math-and-comparisons" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Binary Operators: Math and Comparisons</h5>
+
+<p>Binary operators are used in a prefix notation similar to Lisp.
+Lisplate does not use order of operations.
+The order must be defined within each operator call.</p>
+
+<pre><code>{+ 3 4}
+7
+
+{&lt; {- 4 3} {* {+ 5 2} 7}
+true (1 &lt; 49)
+</code></pre>
+
+<h5>
 <a id="math" class="anchor" href="#math" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Math</h5>
 
-<p>The standard math operators are available:
-<code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>%</code></p>
+<p>The standard math operators are available:</p>
+
+<p><code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>%</code></p>
+
+<p>Each can also be called by the internal names, which the operators are aliases for:</p>
+
+<p><code>add</code>, <code>sub</code>, <code>mul</code>, <code>div</code>, <code>mod</code></p>
 
 <h5>
 <a id="comparisons" class="anchor" href="#comparisons" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Comparisons</h5>
 
-<p>The standard comparison operators are available:
-<code>==</code>, <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code></p>
+<p>The standard comparison operators are available:</p>
+
+<p><code>==</code>, <code>!=</code>, <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code></p>
+
+<p>Each can also be called by the internal names, which the operators are aliases for:</p>
+
+<p><code>eq</code>, <code>neq</code>, <code>lt</code>, <code>gt</code>, <code>lte</code>, <code>gte</code></p>
 
 <p>The one exception is for the <code>not</code>, <code>and</code>, and <code>or</code>
-use the full work instead of the symbol notation.</p>
+use the full word instead of the symbol notation.</p>
 
 <h5>
 <a id="if" class="anchor" href="#if" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>if</h5>
@@ -328,70 +436,53 @@ Parameters passed to the include call will be passed to the template.</p>
 {include "my-other-template" valueOne valueTwo}
 </code></pre>
 
-<h5>
-<a id="binary-operators-math-and-comparisons" class="anchor" href="#binary-operators-math-and-comparisons" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Binary Operators: Math and Comparisons</h5>
-
-<p>Binary operators are used in a prefix notation similar to Lisp.
-Lisplate does not use order of operations.
-The order must be defined within each operator call.</p>
-
-<pre><code>{+ 3 4}
-7
-
-{&lt; {- 4 3} {* {+ 5 2} 7}
-true (1 &lt; 49)
-</code></pre>
-
-<p>Supported operators:</p>
-
-<ul>
-<li><code>*</code></li>
-<li><code>/</code></li>
-<li><code>%</code></li>
-<li><code>+</code></li>
-<li><p><code>-</code></p></li>
-<li><p><code>==</code></p></li>
-<li><code>!=</code></li>
-<li><code>&lt;</code></li>
-<li><code>&gt;</code></li>
-<li><code>&gt;=</code></li>
-<li><code>&lt;=</code></li>
-</ul>
-
 <h3>
-<a id="contexts" class="anchor" href="#contexts" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Contexts</h3>
+<a id="namespaces" class="anchor" href="#namespaces" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Namespaces</h3>
 
-<p>Contexts are special variables that provide access to template parameters and view models.
-Contexts can be used to access variables even if the variable name is used as a parameter.
-To select a context for an identifier, put the context label and a colon before the identifier.
-Contexts and fields on a context are protected and can not be overriden by internal scopes.</p>
+<p>Namespaces are special variables that provide access to template parameters and view models.
+Namespaces can be used to access variables even if the variable name is used as a parameter.
+To select a namespace for an identifier, put the namespace label and a colon before the identifier.
+Namespaces and fields on a namespace are protected and can not be overriden by internal scopes.</p>
 
-<pre><code>Context:Identifier
+<pre><code>Namespace::Identifier
 </code></pre>
 
-<pre><code>{data:myParameter}
-{helper:myHelper}
-{viewmodel:myViewModelItem}
-{strings:someString}
-{each data:myArray {fn (myItem)
+<pre><code>{data::myParameter}
+{helper::myHelper}
+{viewmodel::myViewModelItem}
+{strings::someString}
+{each data::myArray {fn (myItem)
   This is the array item: {myItem}
-  This is the data item: {data:myItem}
+  This is the data item: {data::myItem}
 }}
 </code></pre>
 
-<p>Built in functions are on the <code>runtime</code> context, but are accessible without a context specifier.</p>
+<p>Built in functions are on the <code>runtime</code> namespace, but are accessible without a namespace specifier.</p>
 
-<p>Added helper functions are in the <code>helper</code> context.</p>
+<p>Added helper functions are in the <code>helper</code> namespace.</p>
 
-<p>Data sent to the template via an include or through rendering is in the <code>data</code> context.</p>
+<p>Data sent to the template via an include or through rendering is in the <code>data</code> namespace.</p>
 
-<p>View model fields are accessible in the <code>viewmodel</code> context.</p>
+<p>View model fields are accessible in the <code>viewmodel</code> namespace.</p>
 
-<p>Fields in the strings file are accessible in the <code>strings</code> context.</p>
+<p>Fields in the strings file are accessible in the <code>strings</code> namespace.</p>
 
-<p><strong>Coming soon</strong>: Currently Lisplate does not search contexts.
-Before 1.0, a template should be capable of searching contexts (parameters and viewmodel).
-Specifying a context will avoid the search and may be faster.</p>
+<p>Not specifying a namespace will perform the following searches attempting to locate the identifier:</p>
+
+<ol>
+<li>an internal function?</li>
+<li>declared as a parameter to a parent block/function?</li>
+<li>perform a search in the following order:
+
+<ol>
+<li>viewmodel</li>
+<li>data</li>
+<li>helpers</li>
+<li>strings</li>
+<li>render-context</li>
+</ol>
+</li>
+</ol>
 
 <h3>
 <a id="creating-functions" class="anchor" href="#creating-functions" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Creating Functions</h3>
@@ -413,6 +504,48 @@ This is now a block
 {paramOne} {paramTwo}
 }
 </code></pre>
+
+<h2>
+<a id="issues-to-watch-for" class="anchor" href="#issues-to-watch-for" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Issues to watch for</h2>
+
+<h3>
+<a id="parameters-are-not-called-automatically" class="anchor" href="#parameters-are-not-called-automatically" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Parameters are not called automatically</h3>
+
+<p>Passing a function as a parameter does not resolve the return value immediate.
+The function itself is passed as a parameter.
+In order to call the function immediately, wrap it as an explicit function call.</p>
+
+<pre><code>{myFn1 {myfn2 fn2p1} fn1p2}
+</code></pre>
+
+<h3>
+<a id="this-and-binding" class="anchor" href="#this-and-binding" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>this and Binding</h3>
+
+<p>Lisplate will use proper bindings to maintain <code>this</code> when making a function call.
+The following two examples will call with the generally expected <code>this</code> context.</p>
+
+<pre><code>{myObject.aFunction}
+{myObject.someFunction some parameters}
+</code></pre>
+
+<p>When passing a function as a parameter, the <code>this</code> context will be lost.
+This is the same behavior as in normal JavaScript. The same workarounds apply here.
+The most common occurances revolve around the <code>if</code> and <code>each</code>, which usually
+expect functions to be passed in to execute.</p>
+
+<pre><code>{if myValue myObject.myFnCall} {* "this" context will not be the expected one *}
+</code></pre>
+
+<ol>
+<li>Pre-bind the function in your data or viewmodel before passing into Lisplate</li>
+<li>Wrap in a block to preserve auto-binding behavior
+<code>
+{if myValue {fn
+ {myObject.myFnCall} {* proper binding is maintained here *}
+}}
+</code>
+</li>
+</ol>
 
 <h2>
 <a id="advanced-tips" class="anchor" href="#advanced-tips" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Advanced Tips</h2>
@@ -452,25 +585,18 @@ surrounding scope.</p>
    }
 }
 </code></pre>
-        </section>
-
-        <aside id="sidebar">
-          <a href="https://github.com/HallM/lisplate/zipball/master" class="button">
-            <small>Download</small>
-            .zip file
-          </a>
-          <a href="https://github.com/HallM/lisplate/tarball/master" class="button">
-            <small>Download</small>
-            .tar.gz file
-          </a>
-
-          <p class="repo-owner"><a href="https://github.com/HallM/lisplate"></a> is maintained by <a href="https://github.com/HallM">HallM</a>.</p>
-
-          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
-        </aside>
-      </div>
+      </section>
     </div>
 
-  
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Lisplate maintained by <a href="https://github.com/lisplate">lisplate</a></p>
+        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
   </body>
 </html>
