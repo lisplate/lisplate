@@ -7,6 +7,10 @@ var readFile = Bluebird.promisify(fs.readFile);
 
 describe('Lisplate unit tests', function() {
 
+  beforeEach(function() {
+    Lisplate.FactoryCache = {};
+  });
+
   describe('constructor', function() {
     it('should allow no option constructor', function() {
       var engine = new Lisplate();
@@ -75,6 +79,25 @@ describe('Lisplate unit tests', function() {
 
       it('should fail with no sourceLoader and not cached', function(done) {
         var engine = new Lisplate();
+        engine
+          .loadTemplate('test')
+          .then(function() {
+            done.fail('Should not call then, expected error');
+          })
+          .catch(function(err) {
+            expect(err).not.toBeNull();
+            done();
+          });
+      });
+
+      it('should fail with no sourceLoader and cache disabled', function(done) {
+        var engine = new Lisplate({
+          cacheEnabled: false
+        });
+        // even if something is in the caches, should be ignored
+        engine.cache.test = function() {return 'test';};
+        Lisplate.FactoryCache.test = function() {return function(){return 'test'};};
+
         engine
           .loadTemplate('test')
           .then(function() {
@@ -220,6 +243,131 @@ describe('Lisplate unit tests', function() {
           .catch(function(err) {
             expect(err).not.toBeNull();
             done();
+          });
+      });
+
+      it('should have in cache when finished', function(done) {
+        var src = '{if}';
+        var compiledSource = 'function(){ return function(){} }';
+        var fn = function(){};
+        var factory = function(){ return fn; };
+        var sourceLoader = jasmine
+          .createSpy('sourceLoader')
+          .and.returnValue(Promise.resolve(src));
+
+        var engine = new Lisplate({
+          cacheEnabled: true,
+          sourceLoader: sourceLoader
+        });
+
+        spyOn(Lisplate.Compiler, 'compile').and.returnValue(compiledSource);
+        spyOn(Lisplate.Utils, 'loadCompiledSource').and.returnValue(factory);
+
+        engine
+          .loadTemplate('test')
+          .then(function() {
+            expect(engine.cache.test).toEqual(fn);
+            expect(Lisplate.FactoryCache.test).toEqual(factory);
+            done();
+          })
+          .catch(function(err) {
+            done.fail('Should not catch with error');
+          });
+      });
+
+      it('should not set cache when explicitly disabled', function(done) {
+        var src = '{if}';
+        var compiledSource = 'function(){ return function(){} }';
+        var fn = function(){};
+        var factory = function(){ return fn; };
+        var sourceLoader = jasmine
+          .createSpy('sourceLoader')
+          .and.returnValue(Promise.resolve(src));
+
+        var engine = new Lisplate({
+          cacheEnabled: false,
+          sourceLoader: sourceLoader
+        });
+
+        spyOn(Lisplate.Compiler, 'compile').and.returnValue(compiledSource);
+        spyOn(Lisplate.Utils, 'loadCompiledSource').and.returnValue(factory);
+
+        engine
+          .loadTemplate('test')
+          .then(function() {
+            expect(engine.cache.test).not.toBeTruthy();
+            expect(Lisplate.FactoryCache.test).not.toBeTruthy();
+            done();
+          })
+          .catch(function(err) {
+            done.fail('Should not catch with error');
+          });
+      });
+
+      it('should use factory cache when cached and cache enabled', function(done) {
+        var src = '{if}';
+        var compiledSource = 'function(){ return function(){} }';
+        var fn = function(){};
+        var factory = function(){ return fn; };
+        var sourceLoader = jasmine
+          .createSpy('sourceLoader')
+          .and.returnValue(Promise.resolve(src));
+
+        spyOn(Lisplate.Compiler, 'compile').and.returnValue(compiledSource);
+        spyOn(Lisplate.Utils, 'loadCompiledSource').and.returnValue(factory);
+
+        Lisplate.FactoryCache.test = factory;
+
+        var engine = new Lisplate({
+          sourceLoader: sourceLoader
+        });
+
+        engine
+          .loadTemplate('test')
+          .then(function(ret) {
+            expect(sourceLoader).not.toHaveBeenCalled();
+            expect(Lisplate.Compiler.compile).not.toHaveBeenCalled();
+            expect(Lisplate.Utils.loadCompiledSource).not.toHaveBeenCalled();
+
+            expect(ret).toEqual(fn);
+            done();
+          })
+          .catch(function(err) {
+            done.fail('Should not catch with error');
+          });
+      });
+
+      it('should not use factory cache when cached and cache disabled', function(done) {
+        var src = '{if}';
+        var compiledSource = 'function(){ return function(){} }';
+        var fn = function(){};
+        var factory = function(){ return fn; };
+        var sourceLoader = jasmine
+          .createSpy('sourceLoader')
+          .and.returnValue(Promise.resolve(src));
+
+        spyOn(Lisplate.Compiler, 'compile').and.returnValue(compiledSource);
+        spyOn(Lisplate.Utils, 'loadCompiledSource').and.returnValue(factory);
+
+        Lisplate.FactoryCache.test = factory;
+
+        var engine = new Lisplate({
+          sourceLoader: sourceLoader,
+          cacheEnabled: false
+        });
+
+        engine
+          .loadTemplate('test')
+          .then(function(ret) {
+            expect(sourceLoader).toHaveBeenCalled();
+            expect(Lisplate.Compiler.compile).toHaveBeenCalled();
+            expect(Lisplate.Utils.loadCompiledSource).toHaveBeenCalled();
+
+            expect(ret).toEqual(fn);
+            done();
+          })
+          .catch(function(err) {
+            done.fail('Should not catch with error');
           });
       });
 
