@@ -423,6 +423,42 @@ This is now a block
 }
 ```
 
+## Issues to watch for ##
+
+### Parameters are not called automatically ###
+
+Passing a function as a parameter does not resolve the return value immediate.
+The function itself is passed as a parameter.
+In order to call the function immediately, wrap it as an explicit function call.
+```
+{myFn1 {myfn2 fn2p1} fn1p2}
+```
+
+### this and Binding ###
+
+Lisplate will use proper bindings to maintain `this` when making a function call.
+The following two examples will call with the generally expected `this` context.
+```
+{myObject.aFunction}
+{myObject.someFunction some parameters}
+```
+
+When passing a function as a parameter, the `this` context will be lost.
+This is the same behavior as in normal JavaScript. The same workarounds apply here.
+The most common occurances revolve around the `if` and `each`, which usually
+expect functions to be passed in to execute.
+```
+{if myValue myObject.myFnCall} {* this context will not be the expected one *}
+```
+
+1. Pre-bind the function in your data or viewmodel before passing into Lisplate
+3. Wrap in a block to preserve auto-binding behavior
+   ```
+   {if myValue {fn
+     {myObject.myFnCall} {* proper binding is maintained here *}
+   }}
+   ```
+
 ## Advanced Tips ##
 
 ### Defining variables ###
