@@ -1,5 +1,15 @@
 # Changelog
 
+### v0.5.0 July 16, 2016 21:50:00 UTC+0
+- Added shared render-factory caching on top of existing instance-level cache
+- Added ability to disable caching for individual instances
+- Changed callback style to support optional parameters
+- Added render-contexts for pass contextual information through components
+- Changed function vs variable resolving to compiled code for JS bind rules
+- Added `get` internal function for using a dynamic key/index in maps/arrays
+- Changed references of "context" to the more appropriate "namespace" nomenclature
+- Added ability to automatically search namespaces for non-namespaced identifiers
+
 ### v0.4.2 July 10, 2016 20:40:00 UTC+0
 - Fixing typo in packagejson breaking compiler
 
