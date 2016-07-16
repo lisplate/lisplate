@@ -1,3 +1,4 @@
 {include "subcomponents/basic" (:should "should" :show {fn
 show
-})}
+})}{~n}
+{include "subcomponents/plain"}
