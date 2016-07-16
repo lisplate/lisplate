@@ -176,7 +176,7 @@ Comments can be anywhere in code and are surrounded by `{*` and `*}`
 {myfunction {* call with empty as parameter *} {}}
 ```
 
-## Arrays ##
+### Arrays ###
 
 The array expression allows creation of standard arrays.
 Arrays may contain anything using expressions.
@@ -188,7 +188,7 @@ similar to function parameters.
 ()
 ```
 
-## Associative Arrays / Maps ##
+### Associative Arrays / Maps ###
 
 Associative arrays expression creates a key to value map.
 The values can be from any expression.
@@ -200,6 +200,21 @@ The syntax is similar to Clojure, but using `()` instead of `{}`.
 ```
 (:key value :two {+ 3 5} :myfn {fn (a b) {- a b}})
 (:)
+```
+
+### Dynamic Key Lookup ###
+
+Looking up a value using a key on an associative array or a normal array uses `get`.
+```
+{get myArray 0}
+{get myArray index}
+{get myObject "myKey"}
+{get myObject dynamicKey}
+```
+
+`get` can also be used without a key to return the value of something.
+```
+{get myValue}
 ```
 
 ### Raw ###
