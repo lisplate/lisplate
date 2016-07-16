@@ -251,7 +251,7 @@ Lisplate will check if the variable is a function to be called or just output th
 {noParamFunction}
 ```
 
-By default, printing the contexts of a variable will be escaped per the HTML escape function.
+By default, printing the contents of a variable will be escaped per the HTML escape function.
 To disable automatic escaping, use a `safe` function before the identifier to print the contents as is.
 
 ```
@@ -379,37 +379,37 @@ Parameters passed to the include call will be passed to the template.
 {include "my-other-template" valueOne valueTwo}
 ```
 
-### Contexts ###
+### Namespaces ###
 
-Contexts are special variables that provide access to template parameters and view models.
-Contexts can be used to access variables even if the variable name is used as a parameter.
-To select a context for an identifier, put the context label and a colon before the identifier.
-Contexts and fields on a context are protected and can not be overriden by internal scopes.
+Namespaces are special variables that provide access to template parameters and view models.
+Namespaces can be used to access variables even if the variable name is used as a parameter.
+To select a namespace for an identifier, put the namespace label and a colon before the identifier.
+Namespaces and fields on a namespace are protected and can not be overriden by internal scopes.
 ```
-Context:Identifier
+Namespace::Identifier
 ```
 ```
-{data:myParameter}
-{helper:myHelper}
-{viewmodel:myViewModelItem}
-{strings:someString}
-{each data:myArray {fn (myItem)
+{data::myParameter}
+{helper::myHelper}
+{viewmodel::myViewModelItem}
+{strings::someString}
+{each data::myArray {fn (myItem)
   This is the array item: {myItem}
-  This is the data item: {data:myItem}
+  This is the data item: {data::myItem}
 }}
 ```
 
-Built in functions are on the `runtime` context, but are accessible without a context specifier.
+Built in functions are on the `runtime` namespace, but are accessible without a namespace specifier.
 
-Added helper functions are in the `helper` context.
+Added helper functions are in the `helper` namespace.
 
-Data sent to the template via an include or through rendering is in the `data` context.
+Data sent to the template via an include or through rendering is in the `data` namespace.
 
-View model fields are accessible in the `viewmodel` context.
+View model fields are accessible in the `viewmodel` namespace.
 
-Fields in the strings file are accessible in the `strings` context.
+Fields in the strings file are accessible in the `strings` namespace.
 
-Not specifying a context will perform the following searches attempting to locate the identifier:
+Not specifying a namespace will perform the following searches attempting to locate the identifier:
 
 1. an internal function?
 2. declared as a parameter to a parent block/function?
@@ -466,7 +466,7 @@ This is the same behavior as in normal JavaScript. The same workarounds apply he
 The most common occurances revolve around the `if` and `each`, which usually
 expect functions to be passed in to execute.
 ```
-{if myValue myObject.myFnCall} {* this context will not be the expected one *}
+{if myValue myObject.myFnCall} {* "this" context will not be the expected one *}
 ```
 
 1. Pre-bind the function in your data or viewmodel before passing into Lisplate

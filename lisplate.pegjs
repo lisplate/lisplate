@@ -68,15 +68,15 @@ key
     = f:keypart r:("." p:keypart { return p; })*
     { return r ? [f].concat(r).join('.') : f; }
 
-ctx
+namespace
     = s:[a-zA-Z] c:[a-zA-Z0-9_]*
     { return s + c.join(''); }
 
 scopeoperator = "::"
 identifier
-    = c:ctx scopeoperator "."
+    = c:namespace scopeoperator "."
     { return ['identifier', [c, null]]; }
-    / c:ctx scopeoperator i:key
+    / c:namespace scopeoperator i:key
     { return ['identifier', [c, i]]; }
     / i:key
     { return ['identifier', ['', i]]; }
