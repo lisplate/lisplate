@@ -717,11 +717,23 @@ describe('Lisplate unit tests', function() {
     it('should work without stringsLoader defined', function() {
       var fakeData = {stuff: 'should show'};
       var renderable = jasmine.createSpy('renderable').and.returnValue(fakeData.stuff);
+      var renderContext = {};
+
+      var engine = new Lisplate();
+      var out = engine.render(renderable, fakeData, renderContext);
+      expect(renderable).toHaveBeenCalledTimes(1);
+      expect(renderable).toHaveBeenCalledWith(fakeData, null, jasmine.any(Object), renderContext);
+      expect(out).toEqual(fakeData.stuff);
+    });
+
+    it('should work without renderContext defined', function() {
+      var fakeData = {stuff: 'should show'};
+      var renderable = jasmine.createSpy('renderable').and.returnValue(fakeData.stuff);
 
       var engine = new Lisplate();
       var out = engine.render(renderable, fakeData);
       expect(renderable).toHaveBeenCalledTimes(1);
-      expect(renderable).toHaveBeenCalledWith(fakeData, null, jasmine.any(Object));
+      expect(renderable).toHaveBeenCalledWith(fakeData, null, jasmine.any(Object), undefined);
       expect(out).toEqual(fakeData.stuff);
     });
 
@@ -738,7 +750,7 @@ describe('Lisplate unit tests', function() {
         .render(renderable, fakeData)
         .then(function(out) {
           expect(renderable).toHaveBeenCalledTimes(1);
-          expect(renderable).toHaveBeenCalledWith(fakeData, fakeStrings, jasmine.any(Object));
+          expect(renderable).toHaveBeenCalledWith(fakeData, fakeStrings, jasmine.any(Object), undefined);
           expect(out).toEqual(fakeData.stuff);
           done();
         })
@@ -779,7 +791,7 @@ describe('Lisplate unit tests', function() {
         .render(renderable, fakeData)
         .then(function(out) {
           expect(renderable).toHaveBeenCalledTimes(1);
-          expect(renderable).toHaveBeenCalledWith(fakeData, fakeStrings, jasmine.any(Object));
+          expect(renderable).toHaveBeenCalledWith(fakeData, fakeStrings, jasmine.any(Object), undefined);
           expect(out).toEqual(fakeData.stuff);
           done();
         })
@@ -801,7 +813,7 @@ describe('Lisplate unit tests', function() {
         .render(renderable, fakeData)
         .then(function(out) {
           expect(renderable).toHaveBeenCalledTimes(1);
-          expect(renderable).toHaveBeenCalledWith(fakeData, fakeStrings, jasmine.any(Object));
+          expect(renderable).toHaveBeenCalledWith(fakeData, fakeStrings, jasmine.any(Object), undefined);
           expect(out).toEqual(fakeData.stuff);
           done();
         })
@@ -829,25 +841,60 @@ describe('Lisplate unit tests', function() {
         });
     });
 
-    it('should allow callback support with return direct', function(done) {
+    it('should allow callback support with renderContext with return direct', function(done) {
+      var renderable = jasmine.createSpy('renderable').and.returnValue('test');
+      var renderContext = {};
+
+      var engine = new Lisplate();
+      engine.render(renderable, null, renderContext, function(err, out) {
+        expect(renderable).toHaveBeenCalledTimes(1);
+        expect(renderable).toHaveBeenCalledWith(null, null, jasmine.any(Object), renderContext);
+        expect(out).toEqual('test');
+        done();
+      });
+    });
+    it('should allow callback support without renderContext with return direct', function(done) {
       var renderable = jasmine.createSpy('renderable').and.returnValue('test');
 
       var engine = new Lisplate();
       engine.render(renderable, null, function(err, out) {
         expect(renderable).toHaveBeenCalledTimes(1);
-        expect(renderable).toHaveBeenCalledWith(null, null, jasmine.any(Object));
+        expect(renderable).toHaveBeenCalledWith(null, null, jasmine.any(Object), undefined);
+        expect(out).toEqual('test');
+        done();
+      });
+    });
+    it('should allow callback support with only renderable', function(done) {
+      var renderable = jasmine.createSpy('renderable').and.returnValue('test');
+
+      var engine = new Lisplate();
+      engine.render(renderable, function(err, out) {
+        expect(renderable).toHaveBeenCalledTimes(1);
+        expect(renderable).toHaveBeenCalledWith(undefined, null, jasmine.any(Object), undefined);
         expect(out).toEqual('test');
         done();
       });
     });
 
-    it('should allow callback support with return promise', function(done) {
+    it('should allow callback support with renderContext with return promise', function(done) {
+      var renderable = jasmine.createSpy('renderable').and.returnValue(Promise.resolve('test'));
+      var renderContext = {};
+
+      var engine = new Lisplate();
+      engine.render(renderable, null, renderContext, function(err, out) {
+        expect(renderable).toHaveBeenCalledTimes(1);
+        expect(renderable).toHaveBeenCalledWith(null, null, jasmine.any(Object), renderContext);
+        expect(out).toEqual('test');
+        done();
+      });
+    });
+    it('should allow callback support without renderContext with return promise', function(done) {
       var renderable = jasmine.createSpy('renderable').and.returnValue(Promise.resolve('test'));
 
       var engine = new Lisplate();
       engine.render(renderable, null, function(err, out) {
         expect(renderable).toHaveBeenCalledTimes(1);
-        expect(renderable).toHaveBeenCalledWith(null, null, jasmine.any(Object));
+        expect(renderable).toHaveBeenCalledWith(null, null, jasmine.any(Object), undefined);
         expect(out).toEqual('test');
         done();
       });
@@ -872,6 +919,7 @@ describe('Lisplate unit tests', function() {
       var renderable = function(){};
       var fakePromise = {};
       var fakeData = {stuff: 'should show'};
+      var renderContext = {};
       var thenable = {
         then: jasmine
           .createSpy('thenable')
@@ -887,12 +935,12 @@ describe('Lisplate unit tests', function() {
 
       spyOn(engine, 'render');
 
-      var ret = engine.renderTemplate('test', fakeData);
+      var ret = engine.renderTemplate('test', fakeData, renderContext);
 
       expect(engine.loadTemplate).toHaveBeenCalledTimes(1);
       expect(engine.loadTemplate).toHaveBeenCalledWith('test');
       expect(engine.render).toHaveBeenCalledTimes(1);
-      expect(engine.render).toHaveBeenCalledWith(renderable, fakeData);
+      expect(engine.render).toHaveBeenCalledWith(renderable, fakeData, renderContext);
       expect(ret).toEqual(fakePromise);
     });
 

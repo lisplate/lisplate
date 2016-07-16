@@ -108,6 +108,34 @@ describe('Compiler unit tests', function() {
       }).toThrowError(pegSyntaxError);
     });
 
+    it('should error no params for include', function() {
+      parser.parse = function() {
+        return ['block',[['call',[['identifier',['','include']]]]]];
+      };
+
+      expect(function() {
+        compiler.compile('test', 'src');
+      }).toThrowError(pegSyntaxError);
+    });
+    it('should error for 0 params for include', function() {
+      parser.parse = function() {
+        return ['block',[['call',[['identifier',['','include']],[]]]]];
+      };
+
+      expect(function() {
+        compiler.compile('test', 'src');
+      }).toThrowError(pegSyntaxError);
+    });
+    it('should error for 3 params for include', function() {
+      parser.parse = function() {
+        return ['block',[['call',[['identifier',['','include']],['1','2','3']]]]];
+      };
+
+      expect(function() {
+        compiler.compile('test', 'src');
+      }).toThrowError(pegSyntaxError);
+    });
+
     it('should error with unknown escape sequences', function() {
       parser.parse = function() {
         return ['block', [['escape', 'badescapeseq']]];
