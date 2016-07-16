@@ -279,18 +279,42 @@ Declaring anything as "safe" will negate any later escapes.
 
 Lisplate provides a number of built-in functions.
 
+##### Binary Operators: Math and Comparisons #####
+
+Binary operators are used in a prefix notation similar to Lisp.
+Lisplate does not use order of operations.
+The order must be defined within each operator call.
+
+```
+{+ 3 4}
+7
+
+{< {- 4 3} {* {+ 5 2} 7}
+true (1 < 49)
+```
+
 ##### Math #####
 
 The standard math operators are available:
+
 `+`, `-`, `*`, `/`, `%`
+
+Each can also be called by the internal names, which the operators are aliases for:
+
+`add`, `sub`, `mul`, `div`, `mod`
 
 ##### Comparisons #####
 
 The standard comparison operators are available:
-`==`, `<`, `>`, `<=`, `>=`
+
+`==`, `!=`, `<`, `>`, `<=`, `>=`
+
+Each can also be called by the internal names, which the operators are aliases for:
+
+`eq`, `neq`, `lt`, `gt`, `lte`, `gte`
 
 The one exception is for the `not`, `and`, and `or`
-use the full work instead of the symbol notation.
+use the full word instead of the symbol notation.
 
 ##### if #####
 
@@ -355,34 +379,6 @@ Parameters passed to the include call will be passed to the template.
 {include "my-other-template" valueOne valueTwo}
 ```
 
-##### Binary Operators: Math and Comparisons #####
-
-Binary operators are used in a prefix notation similar to Lisp.
-Lisplate does not use order of operations.
-The order must be defined within each operator call.
-
-```
-{+ 3 4}
-7
-
-{< {- 4 3} {* {+ 5 2} 7}
-true (1 < 49)
-```
-
-Supported operators:
-* `*`
-* `/`
-* `%`
-* `+`
-* `-`
-
-* `==`
-* `!=`
-* `<`
-* `>`
-* `>=`
-* `<=`
-
 ### Contexts ###
 
 Contexts are special variables that provide access to template parameters and view models.
@@ -413,9 +409,16 @@ View model fields are accessible in the `viewmodel` context.
 
 Fields in the strings file are accessible in the `strings` context.
 
-**Coming soon**: Currently Lisplate does not search contexts.
-Before 1.0, a template should be capable of searching contexts (parameters and viewmodel).
-Specifying a context will avoid the search and may be faster.
+Not specifying a context will perform the following searches attempting to locate the identifier:
+
+1. an internal function?
+2. declared as a parameter to a parent block/function?
+3. perform a search in the following order:
+   1. viewmodel
+   2. data
+   3. helpers
+   4. strings
+   5. render-context
 
 ### Creating Functions ###
 
