@@ -1,5 +1,8 @@
 # Changelog
 
+### v0.5.2 July 17, 2016 01:50:00 UTC+0
+- Also pass render-context to strings loader. Only `stringsLoader`.
+
 ### v0.5.1 July 17, 2016 01:40:00 UTC+0
 - Now passing strings and render-context to viewmodel constructors
 
