@@ -1,6 +1,6 @@
 {
   "name": "lisplate",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "Functional template engine based on Lisp-like syntax for JavaScript",
   "bin": {
     "lisplatec": "./bin/lisplatec"

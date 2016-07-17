@@ -805,7 +805,7 @@ describe('Lisplate unit tests', function() {
       var renderable = jasmine.createSpy('renderable').and.returnValue(fakeData.stuff);
       var fakeStrings = {str: 'a-string'};
       var engine = new Lisplate({
-        stringsLoader: function(templateName, callback) {
+        stringsLoader: function(templateName, renderContext, callback) {
           callback(null, fakeStrings);
         }
       });
@@ -826,7 +826,7 @@ describe('Lisplate unit tests', function() {
       var renderable = jasmine.createSpy('renderable').and.returnValue(fakeData.stuff);
       var fakeStrings = {str: 'a-string'};
       var engine = new Lisplate({
-        stringsLoader: function(templateName, callback) {
+        stringsLoader: function(templateName, renderContext, callback) {
           callback('some error');
         }
       });
