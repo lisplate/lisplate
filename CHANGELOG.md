@@ -1,5 +1,8 @@
 # Changelog
 
+### v0.5.1 July 17, 2016 01:40:00 UTC+0
+- Now passing strings and render-context to viewmodel constructors
+
 ### v0.5.0 July 16, 2016 21:50:00 UTC+0
 - Added shared render-factory caching on top of existing instance-level cache
 - Added ability to disable caching for individual instances
