@@ -1,5 +1,5 @@
-/*! lisplate - v0.4.2
-* https://github.com/HallM/lisplate
+/*! lisplate - v0.5.3
+* https://github.com/lisplate/lisplate
 * Copyright (c) 2016 ; Released under the MIT License */
 (function(root, factory) {
   if (typeof define === 'function' && define.amd) {
@@ -123,60 +123,68 @@
       return str.replace(jsonReplace, replaceJsonChar);
     },
 
+    get: function(obj, key) {
+      if (!key) {
+        return obj;
+      }
+
+      return obj[key];
+    },
+
     not: function(l) {
-      return !_resolve(l);
+      return !(l);
     },
 
     eq: function(l, r) {
-      return _resolve(l) === _resolve(r);
+      return (l) === (r);
     },
 
     neq: function(l, r) {
-      return _resolve(l) !== _resolve(r);
+      return (l) !== (r);
     },
 
     lt: function(l, r) {
-      return _resolve(l) < _resolve(r);
+      return (l) < (r);
     },
 
     gt: function(l, r) {
-      return _resolve(l) > _resolve(r);
+      return (l) > (r);
     },
 
     lte: function(l, r) {
-      return _resolve(l) <= _resolve(r);
+      return (l) <= (r);
     },
 
     gte: function(l, r) {
-      return _resolve(l) >= _resolve(r);
+      return (l) >= (r);
     },
 
     cmpand: function(l, r) {
-      return _resolve(l) && _resolve(r);
+      return (l) && (r);
     },
 
     cmpor: function(l, r) {
-      return _resolve(l) || _resolve(r);
+      return (l) || (r);
     },
 
     add: function(l, r) {
-      return _resolve(l) + _resolve(r);
+      return (l) + (r);
     },
 
     sub: function(l, r) {
-      return _resolve(l) - _resolve(r);
+      return (l) - (r);
     },
 
     mul: function(l, r) {
-      return _resolve(l) * _resolve(r);
+      return (l) * (r);
     },
 
     div: function(l, r) {
-      return _resolve(l) / _resolve(r);
+      return (l) / (r);
     },
 
     mod: function(l, r) {
-      return _resolve(l) % _resolve(r);
+      return (l) % (r);
     },
 
     safe: function(value) {
@@ -187,7 +195,7 @@
     },
 
     each: function(arr, then, elsethen) {
-      var value = _resolve(arr);
+      var value = (arr);
       if (_thenable(value)) {
         return value.then(function(a) {
           return Runtime.each(a, then, elsethen);
@@ -217,7 +225,7 @@
     },
 
     if: function(cond, then, elsethen) {
-      var value = _resolve(cond);
+      var value = (cond);
       if (_thenable(value)) {
         return value.then(function(c) {
           return Runtime.if(c, then, elsethen);
@@ -238,7 +246,7 @@
 
     // using the same rules that DustJS uses here
     isEmpty: function(item) {
-      var value = _resolve(item);
+      var value = (item);
 
       if (value === 0) {
         return false;
@@ -263,7 +271,7 @@
     this.lastWasAsync = false;
   }
   Chunk.prototype.w = function w(item) {
-    var towrite = _resolve(item);
+    var towrite = (item);
 
     // don't do anything when it's null or undefined
     if (towrite == null) {
@@ -337,11 +345,9 @@
   var _thenable = utils.thenable;
 
   function _callbackify(fn) {
-    var expectedArgs = fn.length;
-
     return function() {
       var totalArgs = arguments.length;
-      var callback = totalArgs > expectedArgs ? arguments[totalArgs - 1] : null;
+      var callback = totalArgs ? arguments[totalArgs - 1] : null;
       var args = null;
       if (typeof callback === 'function') {
         args = Array.prototype.slice.call(arguments, 0, totalArgs - 1);
@@ -418,6 +424,7 @@
   }
   Lisplate.Runtime = runtime;
   Lisplate.Utils = utils;
+  Lisplate.FactoryCache = {};
 
   Lisplate.prototype.addHelper = function addHelper(helperName, fn) {
     this.helpers[helperName] = fn;
@@ -439,11 +446,11 @@
 
     if (renderFactory) {
       renderFactory = Promise.resolve(renderFactory);
+    } else if (_self.cacheEnabled && _self.cache[templateName]) {
+      return Promise.resolve(_self.cache[templateName]);
+    } else if (_self.cacheEnabled && Lisplate.FactoryCache[templateName]) {
+      renderFactory = Promise.resolve(Lisplate.FactoryCache[templateName]);
     } else {
-      if (_self.cache[templateName]) {
-        return Promise.resolve(_self.cache[templateName]);
-      }
-
       if (!_self.sourceLoader) {
         return Promise.reject(new Error('Must define a sourceLoader'));
       }
@@ -470,6 +477,10 @@
     }
 
     return renderFactory.then(function(factory) {
+      if (_self.cacheEnabled) {
+        Lisplate.FactoryCache[templateName] = factory;
+      }
+
       var promise = null;
       if (_self.viewModelLoader) {
         promise = _promisifyPossibleAsync(_self.viewModelLoader)(templateName);
@@ -480,31 +491,34 @@
       return promise.then(function(viewModelClass) {
         var fn = factory(_self, viewModelClass);
         fn.templateName = templateName;
-        _self.cache[templateName] = fn;
+
+        if (_self.cacheEnabled) {
+          _self.cache[templateName] = fn;
+        }
         return fn;
       });
     });
   });
 
-  Lisplate.prototype.render = _callbackify(function render(template, data) {
+  Lisplate.prototype.render = _callbackify(function render(template, data, renderContext) {
     var _self = this;
     if (_self.stringsLoader) {
       return _promisifyPossibleAsync(_self
-        .stringsLoader)(template.templateName)
+        .stringsLoader)(template.templateName, renderContext)
         .then(function(strings) {
-          return template(data, strings, Lisplate.Runtime);
+          return template(data, strings, Lisplate.Runtime, renderContext);
         });
     } else {
       // done this way for non-async optimization
-      return template(data, null, Lisplate.Runtime);
+      return template(data, null, Lisplate.Runtime, renderContext);
     }
   });
 
-  Lisplate.prototype.renderTemplate = _callbackify(function renderTemplate(templateName, data) {
+  Lisplate.prototype.renderTemplate = _callbackify(function renderTemplate(templateName, data, renderContext) {
     var _self = this;
 
     return _self.loadTemplate(templateName).then(function(template) {
-      return _self.render(template, data);
+      return _self.render(template, data, renderContext);
     });
   });
 
@@ -1535,7 +1549,7 @@
       return s0;
     }
 
-    function peg$parsectx() {
+    function peg$parsenamespace() {
       var s0, s1, s2, s3;
 
       s0 = peg$currPos;
@@ -1599,7 +1613,7 @@
       var s0, s1, s2, s3;
 
       s0 = peg$currPos;
-      s1 = peg$parsectx();
+      s1 = peg$parsenamespace();
       if (s1 !== peg$FAILED) {
         s2 = peg$parsescopeoperator();
         if (s2 !== peg$FAILED) {
@@ -1628,7 +1642,7 @@
       }
       if (s0 === peg$FAILED) {
         s0 = peg$currPos;
-        s1 = peg$parsectx();
+        s1 = peg$parsenamespace();
         if (s1 !== peg$FAILED) {
           s2 = peg$parsescopeoperator();
           if (s2 !== peg$FAILED) {
@@ -3141,44 +3155,44 @@
 
   var pegSyntaxError = parser.SyntaxError;
 
-  // function Scope() {
-  //   this.vars = {};
-  // }
-  // Scope.prototype.addToScope = function(key) {
-  //   var index = this.findInScope(key);
-  //   if (index === -1) {
-  //     this.vars.push([key, null]);
-  //   }
-  // };
-  // Scope.prototype.findInScope = function(key) {
-  //   return this.vars.findIndex(function(item) {
-  //     return item[0] === key;
-  //   });
-  // };
+  function Scope() {
+    this.vars = [];
+  }
+  Scope.prototype.addToScope = function(key) {
+    this.vars.push(key);
+  };
+  Scope.prototype.findInScope = function(key) {
+    return this.vars.indexOf(key);
+  };
 
-  // function SymbolTable() {
-  //   this.scopes = [];
-  // }
-  // SymbolTable.prototype.pushScope = function(keys) {
-  //   var newScope = new Scope();
-  //   if (keys && keys.length) {
-  //     keys.forEach(newScope.addToScope);
-  //   }
-  //   this.scopes.splice(0, 0, newScope);
-  // };
-  // SymbolTable.prototype.findAddress = function(key) {
-  //   var address = null;
+  function SymbolTable() {
+    this.scopes = [];
+    this.pushScope();
+  }
+  SymbolTable.prototype.pushScope = function(keys) {
+    var newScope = new Scope();
+    if (keys && keys.length) {
+      keys.forEach(function(k) {
+        newScope.addToScope(k);
+      });
+    }
+    this.scopes.push(newScope);
+  };
+  SymbolTable.prototype.popScope = function() {
+    this.scopes.pop();
+  };
+  SymbolTable.prototype.findAddress = function(key) {
+    for (var i = this.scopes.length; i--;) {
+      var scope = this.scopes[i];
+      var index = scope.findInScope(key);
+      if (index !== -1) {
+        return [i, index];
+      }
+    }
 
-  //   this.scopes.forEach(function(scope, scopeIndex) {
-  //     var index = scope.findInScope(key);
-  //     if (index !== -1) {
-  //       address = [scopeIndex, index];
-  //     }
-  //   });
-
-  //   // if not set, assume it's in the viewmodel
-  //   return address;
-  // };
+    // if not set, it's somewhere else
+    return null;
+  };
 
   function makeErrorWithParserArray(arr, message, expected, found) {
     var line = arr ? arr[3] : 0;
@@ -3201,11 +3215,12 @@
   function Compiler() {
     this.internalsUsed = ['escapeHtml'];
     this._expEscapeDisable = false;
+    this.symbolTable = new SymbolTable();
+    this.needLookup = [];
   }
 
   Compiler.prototype.processblock = function processblock(b) {
     // could be format, buffer, null(comment), or expression
-    // console.log('block');
     var _self = this;
 
     var output = '';
@@ -3237,7 +3252,6 @@
   };
 
   Compiler.prototype.processexp = function processexp(e) {
-    // console.log('exp');
     var type = e[0];
     try {
       if (type === 'fn') {
@@ -3249,7 +3263,7 @@
       } else if (type === 'escape') {
         return this.processescape(e[1]);
       } else if (type === 'identifier') {
-        return this.processidentifier(e[1]);
+        return this.processidentifier(e[1])[0];
       } else if (type === 'literal') {
         return this.processliteral(e[1]);
       } else if (type === 'map') {
@@ -3284,19 +3298,37 @@
   };
 
   Compiler.prototype.processidentifier = function processidentifier(v) {
-    // console.log('identifier');
-    var ctx = v[0];
+    var ns = v[0];
     var identifierName = v[1];
 
-    if (ctx) {
+    if (ns) {
       if (identifierName) {
-        return '$' + ctx + '.' + identifierName;
+        return ['$' + ns + '.' + identifierName, true];
       } else {
-        return '$' + ctx;
+        return ['$' + ns, true];
       }
     }
 
-    return identifierName;
+    if (identifierName === 'include') {
+      return ['$$Lisplate.renderTemplate', false];
+    }
+
+    if (Lisplate.Runtime[identifierName]) {
+      return [this.useinternal(identifierName), false];
+    }
+
+    var parts = identifierName.split('.');
+    var nameRoot = parts[0];
+
+    if (this.symbolTable.findAddress(nameRoot)) {
+      return [identifierName, true];
+    } else {
+      if (this.needLookup.indexOf(nameRoot) === -1) {
+        this.needLookup.push(nameRoot);
+      }
+
+      return ['$lu_' + identifierName, true];
+    }
   };
 
   Compiler.prototype.processliteral = function processliteral(v) {
@@ -3304,7 +3336,6 @@
   };
 
   Compiler.prototype.processmap = function processmap(v) {
-    // console.log('map');
     var _self = this;
 
     var arr = v[0];
@@ -3320,7 +3351,6 @@
   };
 
   Compiler.prototype.processarray = function processarray(v) {
-    // console.log('array');
     var _self = this;
 
     var arr = v[0];
@@ -3340,7 +3370,6 @@
   };
 
   Compiler.prototype.processfn = function processfn(v) {
-    // console.log('fn');
     var params = v[0];
     var block = v[1];
 
@@ -3350,8 +3379,10 @@
         return p;
       }).join(',');
     }
+
+    this.symbolTable.pushScope(params);
+
     output += ') {\nvar $c = new $_w();\n';
-    // output += ') {\n';
 
     if (!block || block[0] !== 'block' || !block[1]) {
       throw makeErrorWithParserArray(
@@ -3363,47 +3394,47 @@
     }
 
     output += this.processblock(block[1]);
-    // output += '\n return $c.getOutput();\n})\n';
+
+    this.symbolTable.popScope();
+
     output += '\n return $c;\n})\n';
     return output;
   };
 
   Compiler.prototype.processcall = function processcall(v) {
-    // console.log('call');
     var _self = this;
 
-    var needsProtection = !this._expEscapeDisable;
+    var needsProtection = true;
 
     var callable = null;
     var type = v[0][0];
+    var params = v[1];
+
     if (type === 'fn') {
       needsProtection = false;
       callable = _self.processfn(v[0][1]);
     } else if (type === 'identifier') {
-      // TODO: is it possible to determine source of identifier?
-      callable = _self.processidentifier(v[0][1]);
+      var ret = _self.processidentifier(v[0][1]);
+      callable = ret[0];
+      needsProtection = this._expEscapeDisable ? false : ret[1];
 
-      if (Lisplate.Runtime[callable]) {
-        needsProtection = false;
-
-        if (callable === 'safe') {
-          this._expEscapeDisable = true;
+      if (callable === '$i_safe') {
+        this._expEscapeDisable = true;
+      } else if (callable === '$$Lisplate.renderTemplate') {
+        if (!params || params.length < 1 || params.length > 2) {
+          throw makeErrorWithParserArray(
+            null,
+            'Include must be called with 1 or 2 parameters: template-name and optional data',
+            '1 or 2 parameters, template-name and optional data',
+            (params ? params.length : 0)
+          );
         }
-        callable = _self.useinternal(callable);
-      } else if (callable === 'include') {
-        needsProtection = false;
-        callable = '$$Lisplate.renderTemplate';
+
+        if (params.length === 1) {
+          params.push(['empty']);
+        }
+        params.push(['identifier', ['ctx', null]]);
       }
-    // } else if (type === 'internal') {
-    //   needsProtection = false;
-    //   if (v[0][1][0] === 'include') {
-    //     callable = '$$Lisplate.renderTemplate';
-    //   } else {
-    //     if (v[0][1][0] === 'safe') {
-    //       this._expEscapeDisable = true;
-    //     }
-    //     callable = useinternal(callable);
-    //   }
     } else {
       throw makeErrorWithParserArray(
         null,
@@ -3413,13 +3444,7 @@
       );
     }
 
-    var params = v[1];
-
     var output = callable;
-
-    if (needsProtection) {
-      output = _self.useinternal('escapeHtml') + '(' + output;
-    }
 
     if (params && params.length) {
       output += '(';
@@ -3427,10 +3452,13 @@
         return _self.processexp(p);
       }).join(',');
       output += ')';
+    } else {
+      // may or may not be a function here
+      output = '(typeof ' + output + ' === \'function\' ? ' + output + '() : ' + output + ')';
     }
 
     if (needsProtection) {
-      output += ')';
+      output = _self.useinternal('escapeHtml') + '(' + output + ')';
     }
 
     this._expEscapeDisable = false;
@@ -3462,7 +3490,28 @@
 
   Compiler.prototype.outputInternals = function outputInternals() {
     return 'var ' + this.internalsUsed.map(function(item) {
-      return '$i_' + item + '= $runtime.' + item;
+      return '$i_' + item + ' = $runtime.' + item;
+    }).join(',\n') + ';\n\n';
+  };
+
+  Compiler.prototype.outputLookups = function outputLookups() {
+    if (!this.needLookup.length) {
+      return '';
+    }
+
+    var lookup = 'function $_lookup(key) {\n' +
+                 '  var searches = [$viewmodel, $data, $helper, $strings, $ctx];\n' +
+                 '  for (var i=0; i < searches.length; i++) {\n' +
+                 '    var s = searches[i];\n' +
+                 '    if (s && s[key]) {\n' +
+                 '      return s[key];\n' +
+                 '    }\n' +
+                 '  }\n' +
+                 '  return null;\n' +
+                 '};\n';
+
+    return lookup + 'var ' + this.needLookup.map(function(key) {
+      return '$lu_' + key + ' = $_lookup(\'' + key + '\')';
     }).join(',\n') + ';\n\n';
   };
 
@@ -3486,14 +3535,16 @@
 
       var compiled = codeGenerator.processblock(ast[1]);
       var internals = codeGenerator.outputInternals();
+      var lookups = codeGenerator.outputLookups();
 
       var code = 'function($$Lisplate,$$vmc){' +
-        'return function($data,$strings,$runtime) {' +
-        'var $viewmodel = $$vmc ? new $$vmc($data) : null;' +
+        'return function($data,$strings,$runtime,$ctx) {' +
+        'var $viewmodel = $$vmc ? new $$vmc($data,$strings,$ctx) : null;' +
         'var $helper = $$Lisplate.helpers;' +
         'var $_w = $runtime.Chunk;' +
         'var $c = new $_w();\n' +
         internals +
+        lookups +
         compiled +
         '\nreturn $c.getOutput();\n}\n}';
       return code;

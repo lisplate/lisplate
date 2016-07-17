@@ -1,5 +1,5 @@
-/*! lisplate - v0.4.2
-* https://github.com/HallM/lisplate
+/*! lisplate - v0.5.3
+* https://github.com/lisplate/lisplate
 * Copyright (c) 2016 ; Released under the MIT License */
 (function(root, factory) {
   if (typeof define === 'function' && define.amd) {
@@ -123,60 +123,68 @@
       return str.replace(jsonReplace, replaceJsonChar);
     },
 
+    get: function(obj, key) {
+      if (!key) {
+        return obj;
+      }
+
+      return obj[key];
+    },
+
     not: function(l) {
-      return !_resolve(l);
+      return !(l);
     },
 
     eq: function(l, r) {
-      return _resolve(l) === _resolve(r);
+      return (l) === (r);
     },
 
     neq: function(l, r) {
-      return _resolve(l) !== _resolve(r);
+      return (l) !== (r);
     },
 
     lt: function(l, r) {
-      return _resolve(l) < _resolve(r);
+      return (l) < (r);
     },
 
     gt: function(l, r) {
-      return _resolve(l) > _resolve(r);
+      return (l) > (r);
     },
 
     lte: function(l, r) {
-      return _resolve(l) <= _resolve(r);
+      return (l) <= (r);
     },
 
     gte: function(l, r) {
-      return _resolve(l) >= _resolve(r);
+      return (l) >= (r);
     },
 
     cmpand: function(l, r) {
-      return _resolve(l) && _resolve(r);
+      return (l) && (r);
     },
 
     cmpor: function(l, r) {
-      return _resolve(l) || _resolve(r);
+      return (l) || (r);
     },
 
     add: function(l, r) {
-      return _resolve(l) + _resolve(r);
+      return (l) + (r);
     },
 
     sub: function(l, r) {
-      return _resolve(l) - _resolve(r);
+      return (l) - (r);
     },
 
     mul: function(l, r) {
-      return _resolve(l) * _resolve(r);
+      return (l) * (r);
     },
 
     div: function(l, r) {
-      return _resolve(l) / _resolve(r);
+      return (l) / (r);
     },
 
     mod: function(l, r) {
-      return _resolve(l) % _resolve(r);
+      return (l) % (r);
     },
 
     safe: function(value) {
@@ -187,7 +195,7 @@
     },
 
     each: function(arr, then, elsethen) {
-      var value = _resolve(arr);
+      var value = (arr);
       if (_thenable(value)) {
         return value.then(function(a) {
           return Runtime.each(a, then, elsethen);
@@ -217,7 +225,7 @@
     },
 
     if: function(cond, then, elsethen) {
-      var value = _resolve(cond);
+      var value = (cond);
       if (_thenable(value)) {
         return value.then(function(c) {
           return Runtime.if(c, then, elsethen);
@@ -238,7 +246,7 @@
 
     // using the same rules that DustJS uses here
     isEmpty: function(item) {
-      var value = _resolve(item);
+      var value = (item);
 
       if (value === 0) {
         return false;
@@ -263,7 +271,7 @@
     this.lastWasAsync = false;
   }
   Chunk.prototype.w = function w(item) {
-    var towrite = _resolve(item);
+    var towrite = (item);
 
     // don't do anything when it's null or undefined
     if (towrite == null) {
@@ -337,11 +345,9 @@
   var _thenable = utils.thenable;
 
   function _callbackify(fn) {
-    var expectedArgs = fn.length;
-
     return function() {
       var totalArgs = arguments.length;
-      var callback = totalArgs > expectedArgs ? arguments[totalArgs - 1] : null;
+      var callback = totalArgs ? arguments[totalArgs - 1] : null;
       var args = null;
       if (typeof callback === 'function') {
         args = Array.prototype.slice.call(arguments, 0, totalArgs - 1);
@@ -418,6 +424,7 @@
   }
   Lisplate.Runtime = runtime;
   Lisplate.Utils = utils;
+  Lisplate.FactoryCache = {};
 
   Lisplate.prototype.addHelper = function addHelper(helperName, fn) {
     this.helpers[helperName] = fn;
@@ -439,11 +446,11 @@
 
     if (renderFactory) {
       renderFactory = Promise.resolve(renderFactory);
+    } else if (_self.cacheEnabled && _self.cache[templateName]) {
+      return Promise.resolve(_self.cache[templateName]);
+    } else if (_self.cacheEnabled && Lisplate.FactoryCache[templateName]) {
+      renderFactory = Promise.resolve(Lisplate.FactoryCache[templateName]);
     } else {
-      if (_self.cache[templateName]) {
-        return Promise.resolve(_self.cache[templateName]);
-      }
-
       if (!_self.sourceLoader) {
         return Promise.reject(new Error('Must define a sourceLoader'));
       }
@@ -470,6 +477,10 @@
     }
 
     return renderFactory.then(function(factory) {
+      if (_self.cacheEnabled) {
+        Lisplate.FactoryCache[templateName] = factory;
+      }
+
       var promise = null;
       if (_self.viewModelLoader) {
         promise = _promisifyPossibleAsync(_self.viewModelLoader)(templateName);
@@ -480,31 +491,34 @@
       return promise.then(function(viewModelClass) {
         var fn = factory(_self, viewModelClass);
         fn.templateName = templateName;
-        _self.cache[templateName] = fn;
+
+        if (_self.cacheEnabled) {
+          _self.cache[templateName] = fn;
+        }
         return fn;
       });
     });
   });
 
-  Lisplate.prototype.render = _callbackify(function render(template, data) {
+  Lisplate.prototype.render = _callbackify(function render(template, data, renderContext) {
     var _self = this;
     if (_self.stringsLoader) {
       return _promisifyPossibleAsync(_self
-        .stringsLoader)(template.templateName)
+        .stringsLoader)(template.templateName, renderContext)
         .then(function(strings) {
-          return template(data, strings, Lisplate.Runtime);
+          return template(data, strings, Lisplate.Runtime, renderContext);
         });
     } else {
       // done this way for non-async optimization
-      return template(data, null, Lisplate.Runtime);
+      return template(data, null, Lisplate.Runtime, renderContext);
     }
   });
 
-  Lisplate.prototype.renderTemplate = _callbackify(function renderTemplate(templateName, data) {
+  Lisplate.prototype.renderTemplate = _callbackify(function renderTemplate(templateName, data, renderContext) {
     var _self = this;
 
     return _self.loadTemplate(templateName).then(function(template) {
-      return _self.render(template, data);
+      return _self.render(template, data, renderContext);
     });
   });
 
