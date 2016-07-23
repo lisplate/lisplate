@@ -13,7 +13,7 @@ start
 
 block
     = s:(Comment* t:(Tag / buffer) { return t; })* Comment*
-    { return ['block', s]; }
+    { return withPosition(['block', s]); }
 
 eol
     = "\n"
@@ -59,7 +59,7 @@ boolean
 
 literal
     = l:(string / number / boolean)
-    { return ['literal', [l]]; }
+    { return withPosition(['literal', [l]]); }
 
 keypart
     = s:[a-zA-Z$_] c:[a-zA-Z0-9$_]*
@@ -75,11 +75,11 @@ namespace
 scopeoperator = "::"
 identifier
     = c:namespace scopeoperator "."
-    { return ['identifier', [c, null]]; }
+    { return withPosition(['identifier', [c, null]]); }
     / c:namespace scopeoperator i:key
-    { return ['identifier', [c, i]]; }
+    { return withPosition(['identifier', [c, i]]); }
     / i:key
-    { return ['identifier', ['', i]]; }
+    { return withPosition(['identifier', ['', i]]); }
 
 paramlist
     = openarray filler p:(k:key filler { return k; })* filler closearray
@@ -90,9 +90,9 @@ paramset
 
 buffer
     = e:eol w:ws*
-    { return ["format", ['\\n' + w.join('')]]; }
+    { return withPosition(["format", ['\\n' + w.join('')]]); }
     / b:(!Comment !opentag !closetag !eol c:. {return c})+
-    { return ["buffer", [b.join('')]]; }
+    { return withPosition(["buffer", [b.join('')]]); }
 
 escapekeys
     = "rb"
@@ -102,7 +102,7 @@ escapekeys
     / "r"
 escapes
     = opentag "~" k:escapekeys closetag
-    { return ['escape', [k]]; }
+    { return withPosition(['escape', [k]]); }
 
 commentopen
     = opentag "*"
@@ -132,21 +132,21 @@ Call
 
 associativeitem
     = ":" k:key filler v:expression
-    { return [k, v]; }
+    { return withPosition([k, v]); }
 Map
     = openarray ":" closearray
-    { return ['map', []]; }
+    { return withPosition(['map', []]); }
     / openarray filler a:(e:associativeitem filler { return e; })+ filler closearray
-    { return ['map', [a]]; }
+    { return withPosition(['map', [a]]); }
 Array
     = openarray closearray
     { return ['array', []]; }
     / openarray filler a:(e:expression filler { return e; })+ filler closearray
-    { return ['array', [a]]; }
+    { return withPosition(['array', [a]]); }
 
 Empty
     = opentag closetag
-    { return ['empty', []]; }
+    { return withPosition(['empty', []]); }
 
 Tag
     = FnCreate
@@ -173,7 +173,7 @@ comparators
       / "or" {return 'cmpor'; }
       / "not" {return 'not';}
     )
-    { return ['identifier', [null, c]]; }
+    { return withPosition(['identifier', [null, c]]); }
 mathators
     = c:(
         "+" {return 'add'; }
@@ -182,7 +182,7 @@ mathators
       / "/" {return 'div'; }
       / "%" {return 'mod'; }
     )
-    { return ['identifier', [null, c]]; }
+    { return withPosition(['identifier', [null, c]]); }
 
 callable
     = FnCreate
