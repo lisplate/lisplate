@@ -287,32 +287,348 @@ describe('Compiler unit tests', function() {
         compiler.compile('test', 'src');
       }).toThrowError(pegSyntaxError);
     });
+
+    it('should error when pragma called with no params', function() {
+      parser.parse = function() {
+        return ['block', [
+          ['call', [['identifier', ['', 'pragma']]]]
+        ]];
+      };
+
+      expect(function() {
+        compiler.compile('test', 'src');
+      }).toThrowError(pegSyntaxError);
+    });
+
+    it('should error when pragma called with empty params', function() {
+      parser.parse = function() {
+        return ['block', [
+          ['call', [['identifier', ['', 'pragma']], []]]
+        ]];
+      };
+
+      expect(function() {
+        compiler.compile('test', 'src');
+      }).toThrowError(pegSyntaxError);
+    });
+
+    it('should error when pragma called with 1 param', function() {
+      parser.parse = function() {
+        return ['block', [
+          ['call', [['identifier', ['', 'pragma']], [
+            ['identifier', ['', 'test']]
+          ]]]
+        ]];
+      };
+
+      expect(function() {
+        compiler.compile('test', 'src');
+      }).toThrowError(pegSyntaxError);
+    });
+
+    it('should error when pragma called with 3 param', function() {
+      parser.parse = function() {
+        return ['block', [
+          ['call', [['identifier', ['', 'pragma']], [
+            ['identifier', ['', 'test']],
+            ['identifier', ['', 'something']],
+            ['identifier', ['', 'else']]
+          ]]]
+        ]];
+      };
+
+      expect(function() {
+        compiler.compile('test', 'src');
+      }).toThrowError(pegSyntaxError);
+    });
+
+    it('should error when pragma called with 1st param not identifier', function() {
+      parser.parse = function() {
+        return ['block', [
+          ['call', [['identifier', ['', 'pragma']], [
+            ['literal', ['test']],
+            ['literal', ['test']]
+          ]]]
+        ]];
+      };
+
+      expect(function() {
+        compiler.compile('test', 'src');
+      }).toThrowError(pegSyntaxError);
+    });
+
+    it('should error when pragma called with namespaced identifier', function() {
+      parser.parse = function() {
+        return ['block', [
+          ['call', [['identifier', ['', 'pragma']], [
+            ['identifier', ['ns', 'test']],
+            ['literal', ['something']]
+          ]]]
+        ]];
+      };
+
+      expect(function() {
+        compiler.compile('test', 'src');
+      }).toThrowError(pegSyntaxError);
+    });
+
+    it('should error when pragma called with 2nd param not literal', function() {
+      parser.parse = function() {
+        return ['block', [
+          ['call', [['identifier', ['', 'pragma']], [
+            ['identifier', ['', 'keep']],
+            ['identifier', ['', 'test']]
+          ]]]
+        ]];
+      };
+
+      expect(function() {
+        compiler.compile('test', 'src');
+      }).toThrowError(pegSyntaxError);
+    });
+
+    it('should error when pragma called with invalid pragma', function() {
+      parser.parse = function() {
+        return ['block', [
+          ['call', [['identifier', ['', 'pragma']], [
+            ['identifier', ['', '**invalid**']],
+            ['literal', [false]]
+          ]]]
+        ]];
+      };
+
+      expect(function() {
+        compiler.compile('test', 'src');
+      }).toThrowError(pegSyntaxError);
+    });
+  });
+
+  describe('compiler options', function() {
+    it('should default enabled trim format-whitespace', function(done) {
+      var src = 'test\n   test';
+
+      var compiled = compiler.compile('test', src);
+      var factory = Lisplate.Utils.loadCompiledSource(compiled);
+
+      var engine = new Lisplate();
+      engine.renderTemplate({
+        templateName: 'test',
+        renderFactory: factory
+      }).then(function(out) {
+        expect(out).toEqual('testtest');
+        done();
+      }).catch(function(err) {
+        done.fail('Did not expect catch to be called ' + err);
+      });
+    });
+
+    it('should allow disable trim format-whitespace', function(done) {
+      var src = 'test\n   test';
+
+      var compiled = compiler.compile('test', src, {
+        keepWhitespace: true
+      });
+      var factory = Lisplate.Utils.loadCompiledSource(compiled);
+
+      var engine = new Lisplate();
+      engine.renderTemplate({
+        templateName: 'test',
+        renderFactory: factory
+      }).then(function(out) {
+        expect(out).toEqual('test\n   test');
+        done();
+      }).catch(function(err) {
+        done.fail('Did not expect catch to be called ' + err);
+      });
+    });
+
+    it('should allow enable trim format-whitespace', function(done) {
+      var src = 'test\n   test';
+
+      var compiled = compiler.compile('test', src, {
+        keepWhitespace: false
+      });
+      var factory = Lisplate.Utils.loadCompiledSource(compiled);
+
+      var engine = new Lisplate();
+      engine.renderTemplate({
+        templateName: 'test',
+        renderFactory: factory
+      }).then(function(out) {
+        expect(out).toEqual('testtest');
+        done();
+      }).catch(function(err) {
+        done.fail('Did not expect catch to be called ' + err);
+      });
+    });
+
+    it('should default escaper to escapeHtml', function(done) {
+      var src = '{data::test}';
+
+      var compiled = compiler.compile('test', src);
+      var factory = Lisplate.Utils.loadCompiledSource(compiled);
+
+      spyOn(Lisplate.Runtime, 'escapeHtml').and.callThrough();
+      spyOn(Lisplate.Runtime, 'escapeJs').and.callThrough();
+      spyOn(Lisplate.Runtime, 'escapeJson').and.callThrough();
+
+      var engine = new Lisplate();
+      engine.renderTemplate({
+        templateName: 'test',
+        renderFactory: factory
+      }, {test: '<br>'}).then(function(out) {
+        expect(out).toEqual('&lt;br&gt;');
+        expect(Lisplate.Runtime.escapeHtml).toHaveBeenCalled();
+        expect(Lisplate.Runtime.escapeJs).not.toHaveBeenCalled();
+        expect(Lisplate.Runtime.escapeJson).not.toHaveBeenCalled();
+        done();
+      }).catch(function(err) {
+        done.fail('Did not expect catch to be called ' + err);
+      });
+    });
+
+    it('should allow escaper to be falsey (disabled)', function(done) {
+      var src = '{data::test}';
+
+      var compiled = compiler.compile('test', src, {
+        defaultEscape: false
+      });
+      var factory = Lisplate.Utils.loadCompiledSource(compiled);
+
+      spyOn(Lisplate.Runtime, 'escapeHtml').and.callThrough();
+      spyOn(Lisplate.Runtime, 'escapeJs').and.callThrough();
+      spyOn(Lisplate.Runtime, 'escapeJson').and.callThrough();
+
+      var engine = new Lisplate();
+      engine.renderTemplate({
+        templateName: 'test',
+        renderFactory: factory
+      }, {test: '<"test">'}).then(function(out) {
+        expect(out).toEqual('<"test">');
+        expect(Lisplate.Runtime.escapeHtml).not.toHaveBeenCalled();
+        expect(Lisplate.Runtime.escapeJs).not.toHaveBeenCalled();
+        expect(Lisplate.Runtime.escapeJson).not.toHaveBeenCalled();
+        done();
+      }).catch(function(err) {
+        done.fail('Did not expect catch to be called ' + err);
+      });
+    });
+
+    it('should allow user specified internal escaper', function(done) {
+      var src = '{data::test}';
+
+      var compiled = compiler.compile('test', src, {
+        defaultEscape: 'escapeJs'
+      });
+      var factory = Lisplate.Utils.loadCompiledSource(compiled);
+
+      spyOn(Lisplate.Runtime, 'escapeHtml').and.callThrough();
+      spyOn(Lisplate.Runtime, 'escapeJs').and.callThrough();
+      spyOn(Lisplate.Runtime, 'escapeJson').and.callThrough();
+
+      var engine = new Lisplate();
+      engine.renderTemplate({
+        templateName: 'test',
+        renderFactory: factory
+      }, {test: '"test"'}).then(function(out) {
+        expect(out).toEqual('\\"test\\"');
+        expect(Lisplate.Runtime.escapeHtml).not.toHaveBeenCalled();
+        expect(Lisplate.Runtime.escapeJs).toHaveBeenCalled();
+        expect(Lisplate.Runtime.escapeJson).not.toHaveBeenCalled();
+        done();
+      }).catch(function(err) {
+        done.fail('Did not expect catch to be called ' + err);
+      });
+    });
+
+    it('should allow user specified external escaper', function(done) {
+      var src = '{data::test}';
+
+      var escaper = jasmine.createSpy('escaper').and.callFake(function(str) {
+        return 'custom escape';
+      });
+
+      var compiled = compiler.compile('test', src, {
+        defaultEscape: 'helper::escaper'
+      });
+      var factory = Lisplate.Utils.loadCompiledSource(compiled);
+
+      spyOn(Lisplate.Runtime, 'escapeHtml').and.callThrough();
+      spyOn(Lisplate.Runtime, 'escapeJs').and.callThrough();
+      spyOn(Lisplate.Runtime, 'escapeJson').and.callThrough();
+
+      var engine = new Lisplate();
+      engine.addHelper('escaper', escaper);
+      engine.renderTemplate({
+        templateName: 'test',
+        renderFactory: factory
+      }, {test: '<"test">'}).then(function(out) {
+        expect(out).toEqual('custom escape');
+        expect(Lisplate.Runtime.escapeHtml).not.toHaveBeenCalled();
+        expect(Lisplate.Runtime.escapeJs).not.toHaveBeenCalled();
+        expect(Lisplate.Runtime.escapeJson).not.toHaveBeenCalled();
+        done();
+      }).catch(function(err) {
+        done.fail('Did not expect catch to be called ' + err);
+      });
+    });
   });
 
   describe('compileModule', function() {
-    it('should wrap compiled code', function(done) {
+    it('should support falsey wrapper to return without wrap', function() {
       var src = 'test';
+      var test = compiler.compile('test', src);
+      var out = compiler.compileModule('test', src, {
+        wrapper: false
+      });
+      expect(out).toEqual(test);
+    });
+
+    it('should default to umd wrap', function() {
+      var src = 'test';
+      var test = compiler.compile('test', src);
       var out = compiler.compileModule('test', src);
       expect(out).not.toEqual(src);
+      expect(out).not.toEqual(test);
+    });
 
-      var targetPath = __dirname + '/out/test';
-      var targetModule = new Module(targetPath, module.parent);
-      targetModule._compile(out, targetPath);
+    it('should support umd wrapper', function() {
+      var src = 'test';
+      var test = compiler.compile('test', src);
+      var out = compiler.compileModule('test', src, {wrapper: 'umd'});
+      expect(out).not.toEqual(src);
+      expect(out).not.toEqual(test);
+    });
 
-      var engine = new Lisplate();
-      engine
-        .loadTemplate(targetModule.exports)
-        .then(function(fn) {
-          return engine.render(fn, null);
-        })
-        .then(function(rendered) {
-          expect(rendered).toEqual('test');
-          done();
-        })
-        .catch(function(err) {
-          done.fail('Catch should not be called with error');
-        });
-      done();
+    it('should support amd wrapper', function() {
+      var src = 'test';
+      var test = compiler.compile('test', src);
+      var out = compiler.compileModule('test', src, {wrapper: 'amd'});
+      expect(out).not.toEqual(src);
+      expect(out).not.toEqual(test);
+    });
+
+    it('should support commonjs wrapper', function() {
+      var src = 'test';
+      var test = compiler.compile('test', src);
+      var out = compiler.compileModule('test', src, {wrapper: 'commonjs'});
+      expect(out).not.toEqual(src);
+      expect(out).not.toEqual(test);
+    });
+
+    it('should support es6 wrapper', function() {
+      var src = 'test';
+      var test = compiler.compile('test', src);
+      var out = compiler.compileModule('test', src, {wrapper: 'es6'});
+      expect(out).not.toEqual(src);
+      expect(out).not.toEqual(test);
+    });
+
+    it('should error if unsupport wrapper', function() {
+      var src = 'test';
+      expect(function() {
+        compiler.compileModule('test', src, {wrapper: '**invalid**'});
+      }).toThrowError();
     });
   });
 

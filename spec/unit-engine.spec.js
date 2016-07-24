@@ -32,6 +32,41 @@ describe('Lisplate unit tests', function() {
       expect(engine.viewModelLoader).not.toBeNull();
       expect(engine.stringsLoader).not.toBeNull();
     });
+
+    it('should allow compiler options to be set', function() {
+      var src = '{if}';
+      var compiledSource = 'function(){ return function(){} }';
+      var factory = function(){ return function(){} };
+      var sourceLoader = jasmine
+        .createSpy('sourceLoader')
+        .and.returnValue(src);
+
+      var compilerOptions = {
+        keepWhitespace: true
+      };
+
+      var engine = new Lisplate({
+        sourceLoader: sourceLoader,
+        compilerOptions: compilerOptions
+      });
+      spyOn(Lisplate.Compiler, 'compile').and.returnValue(compiledSource);
+      spyOn(Lisplate.Utils, 'loadCompiledSource').and.returnValue(factory);
+
+      engine
+        .loadTemplate('test')
+        .then(function() {
+          expect(sourceLoader).toHaveBeenCalledTimes(1);
+          expect(sourceLoader).toHaveBeenCalledWith('test');
+          expect(Lisplate.Compiler.compile).toHaveBeenCalledTimes(1);
+          expect(Lisplate.Compiler.compile).toHaveBeenCalledWith('test', src, compilerOptions);
+          expect(Lisplate.Utils.loadCompiledSource).toHaveBeenCalledTimes(1);
+          expect(Lisplate.Utils.loadCompiledSource).toHaveBeenCalledWith(compiledSource);
+          done();
+        })
+        .catch(function(err) {
+          done.fail('Should not catch with error');
+        });
+    });
   });
 
   describe('loadTemplate', function() {
@@ -130,7 +165,7 @@ describe('Lisplate unit tests', function() {
             expect(sourceLoader).toHaveBeenCalledTimes(1);
             expect(sourceLoader).toHaveBeenCalledWith('test');
             expect(Lisplate.Compiler.compile).toHaveBeenCalledTimes(1);
-            expect(Lisplate.Compiler.compile).toHaveBeenCalledWith('test', src);
+            expect(Lisplate.Compiler.compile).toHaveBeenCalledWith('test', src, undefined);
             expect(Lisplate.Utils.loadCompiledSource).toHaveBeenCalledTimes(1);
             expect(Lisplate.Utils.loadCompiledSource).toHaveBeenCalledWith(compiledSource);
             done();
@@ -184,13 +219,13 @@ describe('Lisplate unit tests', function() {
             expect(sourceLoader).toHaveBeenCalledTimes(1);
             expect(sourceLoader).toHaveBeenCalledWith('test');
             expect(Lisplate.Compiler.compile).toHaveBeenCalledTimes(1);
-            expect(Lisplate.Compiler.compile).toHaveBeenCalledWith('test', src);
+            expect(Lisplate.Compiler.compile).toHaveBeenCalledWith('test', src, undefined);
             expect(Lisplate.Utils.loadCompiledSource).toHaveBeenCalledTimes(1);
             expect(Lisplate.Utils.loadCompiledSource).toHaveBeenCalledWith(compiledSource);
             done();
           })
           .catch(function(err) {
-            done.fail('Should not catch with error');
+            done.fail('Should not catch with error ' + err);
           });
       });
 
@@ -212,7 +247,7 @@ describe('Lisplate unit tests', function() {
           .loadTemplate('test')
           .then(function() {
             expect(Lisplate.Compiler.compile).toHaveBeenCalledTimes(1);
-            expect(Lisplate.Compiler.compile).toHaveBeenCalledWith('test', src);
+            expect(Lisplate.Compiler.compile).toHaveBeenCalledWith('test', src, undefined);
             expect(Lisplate.Utils.loadCompiledSource).toHaveBeenCalledTimes(1);
             expect(Lisplate.Utils.loadCompiledSource).toHaveBeenCalledWith(compiledSource);
             done();
@@ -391,7 +426,7 @@ describe('Lisplate unit tests', function() {
             expect(sourceLoader).toHaveBeenCalledTimes(1);
             expect(sourceLoader).toHaveBeenCalledWith('test');
             expect(Lisplate.Compiler.compile).toHaveBeenCalledTimes(1);
-            expect(Lisplate.Compiler.compile).toHaveBeenCalledWith('test', src);
+            expect(Lisplate.Compiler.compile).toHaveBeenCalledWith('test', src, undefined);
             expect(Lisplate.Utils.loadCompiledSource).toHaveBeenCalledTimes(1);
             expect(Lisplate.Utils.loadCompiledSource).toHaveBeenCalledWith(compiledSource);
             done();
@@ -691,7 +726,7 @@ describe('Lisplate unit tests', function() {
             expect(viewModelLoader).toHaveBeenCalledTimes(1);
             expect(viewModelLoader).toHaveBeenCalledWith('test');
             expect(Lisplate.Compiler.compile).toHaveBeenCalledTimes(1);
-            expect(Lisplate.Compiler.compile).toHaveBeenCalledWith('test', src);
+            expect(Lisplate.Compiler.compile).toHaveBeenCalledWith('test', src, undefined);
             expect(Lisplate.Utils.loadCompiledSource).toHaveBeenCalledTimes(1);
             expect(Lisplate.Utils.loadCompiledSource).toHaveBeenCalledWith(compiledSource);
             expect(factory).toHaveBeenCalledTimes(1);
