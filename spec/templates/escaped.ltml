@@ -4,4 +4,6 @@
 {escapeJson data::json}{~n}
 {escapeHtml ""}{~n}
 {escapeJs ""}{~n}
-{escapeJson ""}
+{escapeJson ""}{~n}
+{escapeJs {safe data::js}}{~n}
+{escapeJson {safe data::json}}

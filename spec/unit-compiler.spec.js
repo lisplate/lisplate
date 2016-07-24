@@ -149,7 +149,34 @@ describe('Compiler unit tests', function() {
     it('should error when def called with no params', function() {
       parser.parse = function() {
         return ['block', [
-          ['call', [['identifier', ['', 'def']]]]
+          ['call', [['identifier', ['', 'safe']]]]
+        ]];
+      };
+
+      expect(function() {
+        compiler.compile('test', 'src');
+      }).toThrowError(pegSyntaxError);
+    });
+
+    it('should error when def called with empty params', function() {
+      parser.parse = function() {
+        return ['block', [
+          ['call', [['identifier', ['', 'safe']], []]]
+        ]];
+      };
+
+      expect(function() {
+        compiler.compile('test', 'src');
+      }).toThrowError(pegSyntaxError);
+    });
+
+    it('should error when def called with 2 params', function() {
+      parser.parse = function() {
+        return ['block', [
+          ['call', [['identifier', ['', 'safe']], [
+            ['literal', ['test']],
+            ['literal', ['test']]
+          ]]]
         ]];
       };
 
