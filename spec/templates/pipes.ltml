@@ -1,0 +1,5 @@
+{"hello world"|{fn (h) {h}}}{~n}
+{("SHOULD SHOW" "should not show" "Should NOT show")|data::fn2|data::fn3}{~n}
+{data::v|data::fn1|data::fn2|data::fn3}{~n}
+{(:key1 "SHOULD SHOW" :key2 "should not show")|data::getkey1|data::fn3}{~n}
+{data::js|escapeJs}

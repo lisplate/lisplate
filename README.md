@@ -240,6 +240,25 @@ Calling an anonymous functions
 } value1 value2}
 ```
 
+#### Function chains with Pipe ####
+
+Functions which take one parameter may be chained together with the pipe operator: `|`.
+The start of the chain can be any literal, array, associative map, variable or function.
+All others in the chain must be functions which receive one parameter: the return value of the previous.
+
+```
+{"var js='test';"|escapeJs}
+{start|fn1|fn2|fn3}
+{(item1 item2)|split|take1|toLowerCase}
+```
+
+Is the same as calling
+```
+{escapeJs "var js='test';"}
+{fn3 {fn2 {fn1 start}}}
+{toLowerCase {take1 {split (item1 item2)}}}
+```
+
 #### Print variable ###
 
 As printing variables is very common in a template language, Lisplate makes them easier.
