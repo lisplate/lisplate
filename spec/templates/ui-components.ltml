@@ -1,3 +1,0 @@
-<div class="my-app">
-    {include "subcomponents/ui-components-colors" data::.}
-</div>

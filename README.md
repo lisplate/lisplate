@@ -3,14 +3,35 @@
 [![npm version](https://badge.fury.io/js/lisplate.svg)](https://badge.fury.io/js/lisplate)
 [![Build Status](https://travis-ci.org/lisplate/lisplate.svg?branch=master)](https://travis-ci.org/lisplate/lisplate)
 [![Coverage Status](https://coveralls.io/repos/github/lisplate/lisplate/badge.svg?branch=master)](https://coveralls.io/github/lisplate/lisplate?branch=master)
+[![Browser Status](https://saucelabs.com/buildstatus/hallm)](https://saucelabs.com/beta/builds/8d3b7edc00fd42ccb9ddbb35b59d29c1)
+
+[![Browser Status](https://saucelabs.com/browser-matrix/hallm.svg)](https://saucelabs.com/beta/builds/8d3b7edc00fd42ccb9ddbb35b59d29c1)
 
 Lisplate is a Lisp-like template engine with a reference implementation for JavaScript.
+
+## Requirements ##
+
+Lisplate requires `Promise` to be defined globally.
+`Promise` can be defined either with ES2015, a `Promise` polyfill,
+or any Promise library, such as Bluebird, with `global.Promise` or `window.Promise` defined.
 
 ## Installing ##
 
 Lisplate is available on NPM.
 ```
 npm install lisplate
+```
+
+## Running Tests ##
+
+To run the tests in NodeJS, use:
+```
+npm run test
+```
+
+To run the tests with Phantom JS, use:
+```
+grunt testClient
 ```
 
 ## Getting Started ##

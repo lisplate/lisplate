@@ -1,3 +1,0 @@
-{viewmodel::showme}{~n}
-{if {viewmodel::iftest} "should show" "should not show"}{~n}
-{each {viewmodel::eachtest} "3x" "should not show"}

@@ -1,6 +1,0 @@
-{data::value.test}{~n}
-{get data::test}{~n}
-{get data::value "test"}{~n}
-{get data::value data::key}{~n}
-{get data::arr 1}{~n}
-{get data::arr data::index}

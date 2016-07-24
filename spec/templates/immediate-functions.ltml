@@ -1,3 +1,0 @@
-{{fn (show)
-should {show}
-} "show"}

@@ -62,15 +62,77 @@ module.exports = function(grunt) {
 
     clean: {
       dist: ['dist/*']
+    },
+
+    connect: {
+     testServer: {
+       options: {
+         port: 3000,
+         keepalive: false
+       }
+     }
+    },
+    'saucelabs-jasmine': {
+      all: {
+        options: {
+          urls: ["http://localhost:3000/"],
+          build: process.env.TRAVIS_JOB_ID,
+          throttled: 3,
+          testname: 'core',
+          browsers: [
+            {browserName: 'chrome'},
+            {browserName: 'firefox', platform: 'Windows 10'},
+            {browserName: 'safari', version: 7, platform: 'OS X 10.9'},
+            {browserName: 'safari', version: 6, platform: 'OS X 10.8'},
+            {browserName: 'internet explorer', version: 11, platform: 'Windows 10'},
+            {browserName: 'internet explorer', version: 10, platform: 'Windows 8'},
+            {browserName: 'internet explorer', version: 9, platform: 'Windows 7'}
+          ],
+          sauceConfig: {
+            'video-upload-on-pass': false
+          }
+        }
+      }
+    },
+    jasmine: {
+      options: {
+        outfile: 'index.html',
+        display: 'short',
+        specs: [
+          'spec/unit-compiler.spec.js',
+          'spec/unit-engine.spec.js',
+          'spec/integration.spec.js'
+        ],
+        vendor: [
+          'https://cdnjs.cloudflare.com/ajax/libs/es6-promise/3.2.2/es6-promise.min.js',
+          'spec/lib/jsreporter.js',
+          'spec/template-tests/all.js'
+        ]
+      },
+      testFull: {
+        src: 'dist/lisplate-full.min.js'
+      }
     }
   });
 
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-clean');
+
+  grunt.loadNpmTasks('grunt-contrib-jasmine');
+  grunt.loadNpmTasks('grunt-contrib-connect');
+  grunt.loadNpmTasks('grunt-saucelabs');
+
   grunt.loadNpmTasks('grunt-peg');
 
   grunt.registerTask('buildParser', ['peg']);
   grunt.registerTask('build', ['clean', 'concat', 'uglify']);
+
+  grunt.registerTask('testClient', ['build', 'jasmine:testFull', 'connect:testServer']);
+  grunt.registerTask('saucelabs', process.env.SAUCE_ACCESS_KEY ? ['jasmine:testFull:build', 'connect:testServer', 'saucelabs-jasmine'] : []);
+
+  grunt.registerTask('travisci', (process.env.TEST === 'all') ? ['build', 'saucelabs'] : []);
+
   grunt.registerTask('default', ['build']);
+
 };

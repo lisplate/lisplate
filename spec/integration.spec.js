@@ -1,97 +1,80 @@
-var Lisplate = require('../');
-var fs = require('fs');
-var path = require('path');
-var Bluebird = require('bluebird');
+(function(root, factory) {
+  if (typeof exports === 'object') {
+    module.exports = factory(require('../'), require('./template-tests/all'));
+  } else {
+    factory(root.Lisplate, root.IntegrationTests);
+  }
+}(this, function(Lisplate, all) {
+  'use strict';
 
-var readFile = Bluebird.promisify(fs.readFile);
+  describe('Integration tests', function() {
+    var engine = null;
 
-var tests = fs
-  .readdirSync(__dirname + '/templates')
-  .filter(function(testname) {
-    return testname !== 'subcomponents';
-  })
-  .map(function(testname) {
-    return testname.substring(0, testname.length - 5);
-  });
+    beforeEach(function() {
+      engine = new Lisplate({
+        sourceLoader: function(templateName) {
+          if (all.tests[templateName]) {
+            return all.tests[templateName].source;
+          }
 
-describe('Integration tests', function() {
-  var engine = null;
+          if (all.subcomponents[templateName]) {
+            return all.subcomponents[templateName].source;
+          }
 
-  beforeEach(function() {
-    engine = new Lisplate({
-      sourceLoader: function(templateName) {
-        var filepath = path.resolve(__dirname, 'templates', templateName + '.ltml');
-        return readFile(filepath, 'UTF-8');
-      },
+          throw new Error('Unknown template to load: ' + templateName);
+        },
 
-      viewModelLoader: function(templateName) {
-        var filepath = path.resolve(__dirname, 'template-viewmodels', templateName + '.js');
-        var viewmodel = null;
-        try {
-            viewmodel = require(filepath);
-        } catch(e) {
+        viewModelLoader: function(templateName) {
+          if (all.tests[templateName]) {
+            return all.tests[templateName].viewmodel;
+          }
+
+          return null;
+        },
+
+        stringsLoader: function(templateName) {
+          if (all.tests[templateName]) {
+            return all.tests[templateName].strings;
+          }
+
+          return null;
         }
-        return Bluebird.resolve(viewmodel);
-      },
+      });
 
-      stringsLoader: function(templateName) {
-        var filepath = path.resolve(__dirname, 'template-strings', templateName + '.json');
-        var strings = null;
-        try {
-            strings = require(filepath);
-        } catch(e) {
+      engine.addHelper('reverse', function reverse(str) {
+        var out = "";
+        for (var i=str.length-1; i>=0; i--) {
+          out += str.charAt(i);
         }
-        return Bluebird.resolve(strings);
-      }
+        return out;
+      });
     });
 
-    engine.addHelper('reverse', function reverse(str) {
-      var out = "";
-      for (var i=str.length-1; i>=0; i--) {
-        out += str.charAt(i);
-      }
-      return out;
+    afterEach(function() {
+      engine = null;
     });
-  });
 
-  afterEach(function() {
-    engine = null;
-    data = null;
-  });
+    Object.keys(all.tests).forEach(function(templateName) {
+      var data = all.tests[templateName].data;
+      var expectedOutput = all.tests[templateName].expected;
 
-  tests.forEach(function(templateName) {
-    var data = null;
-    try {
-      data = require(path.resolve(__dirname, 'template-data', templateName + '.json'));
-    } catch (e) {
-    }
-    if (!data) {
-      try {
-        data = require(path.resolve(__dirname, 'template-data', templateName));
-      } catch (e) {
-      }
-    }
-
-    var expectedOutput = fs.readFileSync(
-      path.resolve(__dirname, 'expected-outputs', templateName + '.html'),
-      'UTF-8'
-    );
-
-    it('Template test - ' + templateName, function(callback) {
-      engine
-        .loadTemplate(templateName)
-        .then(function(fn) {
-          return engine.render(fn, data);
-        })
-        .then(function(output) {
-          expect(output).toEqual(expectedOutput);
-          callback();
-        })
-        .catch(function(err) {
-          console.log(err);
-          callback.fail('Catch should not be called with ' + err.message);
-        });
+      it('Template test - ' + templateName, function(callback) {
+        engine
+          .loadTemplate(templateName)
+          .then(function(fn) {
+            return engine.render(fn, data);
+          })
+          .then(function(output) {
+            expect(output).toEqual(expectedOutput);
+            callback();
+          })
+          .catch(function(err) {
+            console.log(err);
+            callback.fail('Catch should not be called with ' + err.message);
+          });
+      });
     });
+
   });
 
-});
+}));

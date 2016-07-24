@@ -1,5 +1,0 @@
-{helper::reverse data::A}
-{helper::reverse data::B}
-{helper::reverse data::C}
-{helper::reverse data::D}
-{helper::reverse data::E}
