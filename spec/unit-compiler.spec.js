@@ -287,6 +287,120 @@ describe('Compiler unit tests', function() {
         compiler.compile('test', 'src');
       }).toThrowError(pegSyntaxError);
     });
+
+    it('should error when pragma called with no params', function() {
+      parser.parse = function() {
+        return ['block', [
+          ['call', [['identifier', ['', 'pragma']]]]
+        ]];
+      };
+
+      expect(function() {
+        compiler.compile('test', 'src');
+      }).toThrowError(pegSyntaxError);
+    });
+
+    it('should error when pragma called with empty params', function() {
+      parser.parse = function() {
+        return ['block', [
+          ['call', [['identifier', ['', 'pragma']], []]]
+        ]];
+      };
+
+      expect(function() {
+        compiler.compile('test', 'src');
+      }).toThrowError(pegSyntaxError);
+    });
+
+    it('should error when pragma called with 1 param', function() {
+      parser.parse = function() {
+        return ['block', [
+          ['call', [['identifier', ['', 'pragma']], [
+            ['identifier', ['', 'test']]
+          ]]]
+        ]];
+      };
+
+      expect(function() {
+        compiler.compile('test', 'src');
+      }).toThrowError(pegSyntaxError);
+    });
+
+    it('should error when pragma called with 3 param', function() {
+      parser.parse = function() {
+        return ['block', [
+          ['call', [['identifier', ['', 'pragma']], [
+            ['identifier', ['', 'test']],
+            ['identifier', ['', 'something']],
+            ['identifier', ['', 'else']]
+          ]]]
+        ]];
+      };
+
+      expect(function() {
+        compiler.compile('test', 'src');
+      }).toThrowError(pegSyntaxError);
+    });
+
+    it('should error when pragma called with 1st param not identifier', function() {
+      parser.parse = function() {
+        return ['block', [
+          ['call', [['identifier', ['', 'pragma']], [
+            ['literal', ['test']],
+            ['literal', ['test']]
+          ]]]
+        ]];
+      };
+
+      expect(function() {
+        compiler.compile('test', 'src');
+      }).toThrowError(pegSyntaxError);
+    });
+
+    it('should error when pragma called with namespaced identifier', function() {
+      parser.parse = function() {
+        return ['block', [
+          ['call', [['identifier', ['', 'pragma']], [
+            ['identifier', ['ns', 'test']],
+            ['literal', ['something']]
+          ]]]
+        ]];
+      };
+
+      expect(function() {
+        compiler.compile('test', 'src');
+      }).toThrowError(pegSyntaxError);
+    });
+
+    it('should error when pragma called with 2nd param not literal', function() {
+      parser.parse = function() {
+        return ['block', [
+          ['call', [['identifier', ['', 'pragma']], [
+            ['identifier', ['', 'keep']],
+            ['identifier', ['', 'test']]
+          ]]]
+        ]];
+      };
+
+      expect(function() {
+        compiler.compile('test', 'src');
+      }).toThrowError(pegSyntaxError);
+    });
+
+    it('should error when pragma called with invalid pragma', function() {
+      parser.parse = function() {
+        return ['block', [
+          ['call', [['identifier', ['', 'pragma']], [
+            ['identifier', ['', '**invalid**']],
+            ['literal', [false]]
+          ]]]
+        ]];
+      };
+
+      expect(function() {
+        compiler.compile('test', 'src');
+      }).toThrowError(pegSyntaxError);
+    });
   });
 
   describe('compiler options', function() {
