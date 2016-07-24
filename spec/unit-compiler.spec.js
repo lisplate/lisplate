@@ -146,10 +146,61 @@ describe('Compiler unit tests', function() {
       }).toThrowError(pegSyntaxError);
     });
 
+    it('should error when safe called with no params', function() {
+      parser.parse = function() {
+        return ['block', [
+          ['call', [['identifier', ['', 'safe']]]]
+        ]];
+      };
+
+      expect(function() {
+        compiler.compile('test', 'src');
+      }).toThrowError(pegSyntaxError);
+    });
+
+    it('should error when safe called with empty params', function() {
+      parser.parse = function() {
+        return ['block', [
+          ['call', [['identifier', ['', 'safe']], []]]
+        ]];
+      };
+
+      expect(function() {
+        compiler.compile('test', 'src');
+      }).toThrowError(pegSyntaxError);
+    });
+
+    it('should error when safe called with 2 params', function() {
+      parser.parse = function() {
+        return ['block', [
+          ['call', [['identifier', ['', 'safe']], [
+            ['literal', ['test']],
+            ['literal', ['test']]
+          ]]]
+        ]];
+      };
+
+      expect(function() {
+        compiler.compile('test', 'src');
+      }).toThrowError(pegSyntaxError);
+    });
+
     it('should error when def called with no params', function() {
       parser.parse = function() {
         return ['block', [
           ['call', [['identifier', ['', 'def']]]]
+        ]];
+      };
+
+      expect(function() {
+        compiler.compile('test', 'src');
+      }).toThrowError(pegSyntaxError);
+    });
+
+    it('should error when def called with empty params', function() {
+      parser.parse = function() {
+        return ['block', [
+          ['call', [['identifier', ['', 'def']], []]]
         ]];
       };
 
