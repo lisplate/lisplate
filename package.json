@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/lisplate/lisplate",
   "dependencies": {
-    "cli": "^0.11.2"
+    "commander": "^2.9.0"
   },
   "devDependencies": {
     "bluebird": "^3.4.1",

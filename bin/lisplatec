@@ -1,31 +1,30 @@
 #!/usr/bin/env node
 
-var cli = require('cli').enable('glob', 'version');
-var path = cli.native.path;
-var fs = cli.native.fs;
-var eol = cli.native.os.EOL;
+var program = require('commander');
+var path = require('path');
+var fs = require('fs');
 
 var compiler = require('../lib/compiler');
 
-cli.setApp('lisplacec', require('../package.json').version);
+program
+  .version(require('../package.json').version)
+  .usage('[options] <file|dir ...>')
+  .option('-b, --basedir <dir>', 'starting directory to base template names from')
+  .option('-o, --outdir <dir>', 'the directory to output files to *required*')
+  .option('-e, --ext <ext>', 'the template extention when using a directory, defaults to "ltml"')
+  .parse(process.argv);
 
-cli.setUsage(cli.app + ' [options] input\n\n' +
-    '  Compile all .ltml files in the input directory or glob and outputs compiled files to outdir\n' +
-    cli.app + '--basedir views --outdir out  views/**/*.ltml'
-);
+var files = program.args;
+var basedir = program.basedir || '';
+var outdir = program.outdir || null;
 
-cli.parse({
-    basedir: ['b', 'starting directory to base template names from', 'dir'],
-    outdir: ['o', 'the directory to output files to *required*', 'dir'],
-    ext: [false, 'the template extention when using a directory, defaults to "ltml"', 'string', 'ltml']
-});
-
-var files = cli.args;
-var basedir = cli.options.basedir || '';
-var outdir = cli.options.outdir || null;
+function fatalError(str) {
+    console.log(str);
+    process.exit(1);
+}
 
 if (!outdir) {
-    cli.fatal('The outdir must be defined');
+    fatalError('The outdir must be defined');
 }
 
 basedir = basedir.replace(/\\/g, '/');
@@ -37,7 +36,7 @@ if (basedir.length && basedir[basedir.length-1] !== '/') {
 
 files.forEach(function(file) {
     if (!startsWith(file, basedir)) {
-        cli.fatal('The path `' + file + '` is not within the basedir, `' + basedir + '`');
+        fatalError('The path `' + file + '` is not within the basedir, `' + basedir + '`');
     }
 
     var stats = fs.statSync(file);
@@ -46,7 +45,7 @@ files.forEach(function(file) {
     } else if (stats.isFile()) {
         processFile(file);
     } else {
-        cli.error(file + ' is not a directory or a file');
+        fatalError(file + ' is not a directory or a file');
     }
 });
 
@@ -83,7 +82,7 @@ function makeDirectories(dir) {
         try {
             var stats = fs.statSync(dirpath);
             if (!stats.isDirectory()) {
-                cli.fatal(dirpath + ' is not a directory to output to');
+                fatalError(dirpath + ' is not a directory to output to');
             }
         } catch(e) {
             fs.mkdirSync(dirpath);
@@ -101,11 +100,11 @@ function processDirectory(dir) {
         if (stats.isDirectory()) {
             processDirectory(filepath);
         } else if (stats.isFile()) {
-            if (endsWith(filepath, cli.options.ext)) {
+            if (endsWith(filepath, program.ext)) {
                 processFile(filepath);
             }
         } else {
-            cli.error(file + ' is not a directory or a file');
+            fatalError(file + ' is not a directory or a file');
         }
     });
 }
@@ -123,5 +122,5 @@ function processFile(file) {
     makeDirectories(templateDirectory);
 
     fs.writeFileSync(outputpath, compiled, 'UTF-8');
-    cli.info('Compiled `' + filepath + '` and wrote to `' + outputpath + '`');
+    console.log('Compiled `' + filepath + '` and wrote to `' + outputpath + '`');
 }
