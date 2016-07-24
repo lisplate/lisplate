@@ -126,6 +126,11 @@ FnCreate
     = opentag filler "fn" filler p:(l:paramlist filler { return l; })? b:block filler closetag
     { return withPosition(['fn', [p, b]]); }
 
+pipesymbol = "|"
+Pipe
+    = opentag filler c:pipestart filler etal:(pipesymbol c:pipecontinue { return c; })+ filler closetag
+    { return withPosition(['pipe', [c, etal]]); }
+
 Call
     = opentag filler c:callable filler p:paramset filler closetag
     { return withPosition(['call', [c, p]]); }
@@ -150,6 +155,7 @@ Empty
 
 Tag
     = FnCreate
+    / Pipe
     / Call
     / Raw
     / escapes
@@ -188,4 +194,15 @@ callable
     = FnCreate
     / comparators
     / mathators
+    / identifier
+
+pipestart
+    = FnCreate
+    / Map
+    / Array
+    / literal
+    / identifier
+
+pipecontinue
+    = FnCreate
     / identifier

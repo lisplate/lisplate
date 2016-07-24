@@ -401,6 +401,33 @@ describe('Compiler unit tests', function() {
         compiler.compile('test', 'src');
       }).toThrowError(pegSyntaxError);
     });
+
+    it('should error when pipe starts with invalid pipeable', function() {
+      parser.parse = function() {
+        return ['block', [
+          ['pipe', [['**invalid**', []], [
+          ]]]
+        ]];
+      };
+
+      expect(function() {
+        compiler.compile('test', 'src');
+      }).toThrowError(pegSyntaxError);
+    });
+
+    it('should error when pipe continues with invalid pipeable', function() {
+      parser.parse = function() {
+        return ['block', [
+          ['pipe', [['literal', ['true']], [
+            ['**invalid**', []]
+          ]]]
+        ]];
+      };
+
+      expect(function() {
+        compiler.compile('test', 'src');
+      }).toThrowError(pegSyntaxError);
+    });
   });
 
   describe('compiler options', function() {
