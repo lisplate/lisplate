@@ -1,7 +1,0 @@
-{pragma keepWhitespace true}
-   this keeps whitespace
-   {data::test}
-{pragma keepWhitespace false}
-{pragma defaultEscape "escapeJs"}
-   no longer keeps whitespace
-   {data::test}

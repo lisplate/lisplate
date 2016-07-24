@@ -16,7 +16,7 @@
   },
   "scripts": {
     "build-parser": "pegjs lisplate.pegjs lib/parser.js",
-    "test": "eslint lib/** && istanbul cover jasmine",
+    "test": "eslint lib/** && istanbul cover jasmine && grunt travisci",
     "lint": "eslint lib/**",
     "coverage": "istanbul cover jasmine"
   },
@@ -36,8 +36,11 @@
     "grunt": "^1.0.1",
     "grunt-contrib-clean": "^1.0.0",
     "grunt-contrib-concat": "^1.0.1",
+    "grunt-contrib-connect": "^1.0.2",
+    "grunt-contrib-jasmine": "^1.0.3",
     "grunt-contrib-uglify": "^1.0.1",
     "grunt-peg": "^2.0.1",
+    "grunt-saucelabs": "^9.0.0",
     "istanbul": "^0.4.4",
     "jasmine": "^2.4.1",
     "pegjs": "0.9.0"

@@ -1,9 +1,0 @@
-{inviewmodel}{~n}
-{indata}{~n}
-{instrings}{~n}
-
-{{fn (indata)
-{inviewmodel}{~n}
-{indata}{~n}
-{instrings}
-} "something different"}

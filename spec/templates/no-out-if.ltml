@@ -1,7 +1,0 @@
-{if true {} {}}
-{if true {}}
-{if true}
-{if false {} {}}
-{if false {}}
-{if false}
-{if}

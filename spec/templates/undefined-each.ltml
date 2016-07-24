@@ -1,3 +1,0 @@
-{{fn (test)
-    {each test.key "should not show" "should show"}
-} (:otherkey "value")}

@@ -1,3 +1,0 @@
-{{fn (test)
-    {if test.key "should not show" "should show"}
-} (:otherkey "value")}

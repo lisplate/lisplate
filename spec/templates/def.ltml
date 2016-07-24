@@ -1,9 +1,0 @@
-{def hello "Hello"}
-{hello} World!{~n}
-
-{def func {fn
-  {def hello "Hola"}
-  {def four {+ {* 1 2} {- 87 85}}}
-  {hello} Mundo! {four}
-}}
-{func}
