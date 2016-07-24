@@ -1,5 +1,16 @@
 # Changelog
 
+### v0.6.0 July 24, 2016 21:47:00 UTC+0
+- Added `def` syntax for binding values to immutable identifiers
+- Added better positional information for errors
+- Altered safe and escape rules to allow for using different escapes on default-safe
+- Added function chaining with a pipe syntax
+- Added compiler options for setting:
+    - keepWhitespace: maintains user whitespace on output
+    - defaultEscape: the function to use for escaping content by default
+- Added `pragma` function to allow setting compiler options per-template in the template
+- Added tests for browsers
+
 ### v0.5.3 July 17, 2016 02:09:00 UTC+0
 - Also pass render-context to strings loader. Only `stringsLoader`.
 

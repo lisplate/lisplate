@@ -1,4 +1,4 @@
-/*! lisplate - v0.5.3
+/*! lisplate - v0.6.0
 * https://github.com/lisplate/lisplate
 * Copyright (c) 2016 ; Released under the MIT License */
 (function(root, factory) {
@@ -48,80 +48,84 @@
   var _resolve = utils.resolve;
   var _thenable = utils.thenable;
 
-  var htmlTest = /[&<>\"\']/;
-  var htmlReplace = /[&<>\"\']/g;
-  var htmlReplacements = {
-    '<': '&lt;',
-    '>': '&gt;',
-    '&': '&amp;',
-    '"': '&quot;',
-    '\'': '&#39;'
+  var escapeTests = {
+    html: /[&<>\"\']/,
+    js: /[\\\/\r\n\f\t'"\u2028\u2029]/,
+    json: /["<\u2028\u2029]/
   };
 
-  var jsTest = /[\\\/\r\n\f\t'"\u2028\u2029]/;
-  var jsReplace = /[\\\/\r\n\f\t'"\u2028\u2029]/g;
-  var jsReplacements = {
-    '\\': '\\\\',
-    '/': '\\/',
-    '\r': '\\r',
-    '\n': '\\n',
-    '\f': '\\f',
-    '\t': '\\t',
-    '\'': '\\\'',
-    '"': '\\"',
-    '\u2028': '\\u2028',
-    '\u2029': '\\u2029'
+  var escapeReplaceRegex = {
+    html: /[&<>\"\']/g,
+    js: /[\\\/\r\n\f\t'"\u2028\u2029]/g,
+    json: /["<\u2028\u2029]/g
   };
 
-  var jsonTest = /["<\u2028\u2029]/;
-  var jsonReplace = /["<\u2028\u2029]/g;
-  var jsonReplacements = {
-    '"': '\\"',
-    '<': '\\u003c',
-    '\u2028': '\\u2029',
-    '\u2029': '\\u2029'
+  var escapeReplacements = {
+    html: {
+      '<': '&lt;',
+      '>': '&gt;',
+      '&': '&amp;',
+      '"': '&quot;',
+      '\'': '&#39;'
+    },
+    js: {
+      '\\': '\\\\',
+      '/': '\\/',
+      '\r': '\\r',
+      '\n': '\\n',
+      '\f': '\\f',
+      '\t': '\\t',
+      '\'': '\\\'',
+      '"': '\\"',
+      '\u2028': '\\u2028',
+      '\u2029': '\\u2029'
+    },
+    json: {
+      '"': '\\"',
+      '<': '\\u003c',
+      '\u2028': '\\u2029',
+      '\u2029': '\\u2029'
+    }
   };
 
-  function replaceHtmlChar(match) {
-    return htmlReplacements[match];
+  var escapeReplacers = {
+    html: createEscapeReplacer('html'),
+    js: createEscapeReplacer('js'),
+    json: createEscapeReplacer('json'),
+  };
+
+  function createEscapeReplacer(type) {
+    var replacements = escapeReplacements[type];
+    return function(match) {
+      return replacements[match];
+    };
   }
-  function replaceJsChar(match) {
-    return jsReplacements[match];
-  }
-  function replaceJsonChar(match) {
-    return jsonReplacements[match];
+
+  function createEscaper(type) {
+    var testRegex = escapeTests[type];
+    var replaceRegex = escapeReplaceRegex[type];
+    var replacer = escapeReplacers[type];
+
+    var escaper = function(value) {
+      if (_thenable(value)) {
+        return value.then(function(v) {
+          return escaper(v);
+        });
+      }
+
+      if (!testRegex.test(value)) {
+        return value;
+      }
+      return value.replace(replaceRegex, replacer);
+    };
+
+    return escaper;
   }
 
   var Runtime = {
-    escapeHtml: function escapeHtml(str) {
-      if (typeof str !== 'string') {
-        return str;
-      }
-      if (!htmlTest.test(str)) {
-        return str;
-      }
-      return str.replace(htmlReplace, replaceHtmlChar);
-    },
-
-    escapeJs: function escapeJs(str) {
-      if (typeof str !== 'string') {
-        return str;
-      }
-      if (!jsTest.test(str)) {
-        return str;
-      }
-      return str.replace(jsReplace, replaceJsChar);
-    },
-
-    escapeJson: function escapeJson(str) {
-      if (typeof str !== 'string') {
-        return str;
-      }
-      if (!jsonTest.test(str)) {
-        return str;
-      }
-      return str.replace(jsonReplace, replaceJsonChar);
-    },
+    escapeHtml: createEscaper('html'),
+    escapeJs: createEscaper('js'),
+    escapeJson: createEscaper('json'),
 
     get: function(obj, key) {
       if (!key) {
@@ -185,13 +189,6 @@
 
     mod: function(l, r) {
       return (l) % (r);
-    },
-
-    safe: function(value) {
-      // since chunks are safe/unescaped, we can just wrap it in a chunk
-      var chunk = new Chunk();
-      chunk.w(value);
-      return chunk;
     },
 
     each: function(arr, then, elsethen) {
@@ -418,6 +415,7 @@
     this.sourceLoader = options.sourceLoader;
     this.viewModelLoader = options.viewModelLoader;
     this.stringsLoader = options.stringsLoader;
+    this.compilerOptions = options.compilerOptions;
 
     this.helpers = {};
     this.cache = {};
@@ -466,7 +464,7 @@
           var factory = null;
 
           try {
-            compiled = Lisplate.Compiler.compile(templateName, src);
+            compiled = Lisplate.Compiler.compile(templateName, src, _self.compilerOptions);
             factory = Lisplate.Utils.loadCompiledSource(compiled);
           } catch (e) {
             return Promise.reject(e);
