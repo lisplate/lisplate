@@ -1,6 +1,8 @@
 {data::fn "hello world"}{~n}
 {data::escape}{~n}
 {escapeJs data::js}{~n}
+{escapeHtml {escapeJs data::jsWithHtml}}{~n}
+{escapeHtml {escapeJs {safe data::jsWithHtml}}}{~n}
 {escapeJson data::json}{~n}
 {escapeHtml ""}{~n}
 {escapeJs ""}{~n}
