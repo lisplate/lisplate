@@ -36,9 +36,19 @@
 
 <p><a href="https://badge.fury.io/js/lisplate"><img src="https://badge.fury.io/js/lisplate.svg" alt="npm version"></a>
 <a href="https://travis-ci.org/lisplate/lisplate"><img src="https://travis-ci.org/lisplate/lisplate.svg?branch=master" alt="Build Status"></a>
-<a href="https://coveralls.io/github/lisplate/lisplate?branch=master"><img src="https://coveralls.io/repos/github/lisplate/lisplate/badge.svg?branch=master" alt="Coverage Status"></a></p>
+<a href="https://coveralls.io/github/lisplate/lisplate?branch=master"><img src="https://coveralls.io/repos/github/lisplate/lisplate/badge.svg?branch=master" alt="Coverage Status"></a>
+<a href="https://saucelabs.com/beta/builds/8d3b7edc00fd42ccb9ddbb35b59d29c1"><img src="https://saucelabs.com/buildstatus/hallm" alt="Browser Status"></a></p>
+
+<p><a href="https://saucelabs.com/beta/builds/8d3b7edc00fd42ccb9ddbb35b59d29c1"><img src="https://saucelabs.com/browser-matrix/hallm.svg" alt="Browser Status"></a></p>
 
 <p>Lisplate is a Lisp-like template engine with a reference implementation for JavaScript.</p>
+
+<h2>
+<a id="requirements" class="anchor" href="#requirements" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Requirements</h2>
+
+<p>Lisplate requires <code>Promise</code> to be defined globally.
+<code>Promise</code> can be defined either with ES2015, a <code>Promise</code> polyfill,
+or any Promise library, such as Bluebird, with <code>global.Promise</code> or <code>window.Promise</code> defined.</p>
 
 <h2>
 <a id="installing" class="anchor" href="#installing" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installing</h2>
@@ -46,6 +56,19 @@
 <p>Lisplate is available on NPM.</p>
 
 <pre><code>npm install lisplate
+</code></pre>
+
+<h2>
+<a id="running-tests" class="anchor" href="#running-tests" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Running Tests</h2>
+
+<p>To run the tests in NodeJS, use:</p>
+
+<pre><code>npm run test
+</code></pre>
+
+<p>To run the tests with Phantom JS, use:</p>
+
+<pre><code>grunt testClient
 </code></pre>
 
 <h2>
@@ -296,6 +319,25 @@ Calling an anonymous functions
 </code></pre>
 
 <h4>
+<a id="function-chains-with-pipe" class="anchor" href="#function-chains-with-pipe" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Function chains with Pipe</h4>
+
+<p>Functions which take one parameter may be chained together with the pipe operator: <code>|</code>.
+The start of the chain can be any literal, array, associative map, variable or function.
+All others in the chain must be functions which receive one parameter: the return value of the previous.</p>
+
+<pre><code>{"var js='test';"|escapeJs}
+{start|fn1|fn2|fn3}
+{(item1 item2)|split|take1|toLowerCase}
+</code></pre>
+
+<p>Is the same as calling</p>
+
+<pre><code>{escapeJs "var js='test';"}
+{fn3 {fn2 {fn1 start}}}
+{toLowerCase {take1 {split (item1 item2)}}}
+</code></pre>
+
+<h4>
 <a id="print-variable" class="anchor" href="#print-variable" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Print variable</h4>
 
 <p>As printing variables is very common in a template language, Lisplate makes them easier.
@@ -305,6 +347,9 @@ Lisplate will check if the variable is a function to be called or just output th
 <pre><code>{myValue}
 {noParamFunction}
 </code></pre>
+
+<h4>
+<a id="escaping" class="anchor" href="#escaping" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Escaping</h4>
 
 <p>By default, printing the contents of a variable will be escaped per the HTML escape function.
 To disable automatic escaping, use a <code>safe</code> function before the identifier to print the contents as is.</p>
@@ -316,10 +361,19 @@ To disable automatic escaping, use a <code>safe</code> function before the ident
 <p>The automatic escaping only occurs for externally-defined variables and functions.
 Built-in functions do not escape their output nor do any functions defined in the template.</p>
 
+<p>Externally defined functions recieve non-escaped values as inputs.
+The output of the externally defined function will be escaped.
+Using <code>safe</code> for passing parameters is a no-operation as no escaping is performed anyway.</p>
+
 <p>The available escape functions are <code>escapeHtml</code>, <code>escapeJs</code>, and <code>escapeJson</code>.
-These may be called in the code at any time and compiled.
-Calling one, such as <code>escapeJs</code> will not cause the <code>escapeHtml</code> to be called.
-Declaring anything as "safe" will negate any later escapes.</p>
+These may be called in the code at any time and compiled.</p>
+
+<p>Declaring anything as "safe" will not negate any later escapes.
+Therefore, one may declare something as "safe" for HTML, then escape for JS.</p>
+
+<p>Using one type of escape function will consider the value safe for printing.
+Using an <code>escapeJs</code> may still need to be escaped for HTML to prevent errors.
+In this case, you must use both <code>escapeJs</code> and <code>escapeHtml</code>.</p>
 
 <pre><code>{escapeHtml someHtml}
 {escapeJs someJs}
